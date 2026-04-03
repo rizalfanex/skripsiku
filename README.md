@@ -15,9 +15,6 @@
 
 <br/>
 
-> [!WARNING]
-> **This project is in Beta** — Features may be incomplete, APIs may change, and rough edges exist. Feedback and contributions are warmly welcome!
-
 <p>
   <a href="#getting-started"><b>🚀 Quick Start</b></a> &nbsp;·&nbsp;
   <a href="#features"><b>✨ Features</b></a> &nbsp;·&nbsp;
@@ -26,6 +23,9 @@
 </p>
 
 </div>
+
+> [!WARNING]
+> **This project is in Beta** — Features may be incomplete, APIs may change, and rough edges exist. Feedback and contributions are warmly welcome!
 
 ---
 
