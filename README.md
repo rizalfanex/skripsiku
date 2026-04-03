@@ -1,13 +1,6 @@
 <div align="center">
 
-```
- ____  _        _       _        _ _
-/ ___|| | ___ _(_)_ __ (_)___ __(_) |___  _
-\___ \| |/ / '_| | '_ \| / __/ /| | / / || |
- ___) |   <| | | | |_) | \__ \__ \ |   < \_
-|____/|_|\_\_| |_| .__/|_|___/___/_|_|\_\__,|
-                  |_|
-```
+<img src="logo-skripsiku.png" alt="Skripsiku" width="320" />
 
 ### AI Academic Writing Assistant · Powered by Kimi K2 × NVIDIA
 
