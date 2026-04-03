@@ -5,30 +5,13 @@
 <h3>AI Academic Writing Assistant</h3>
 <p><i>Powered by Kimi K2 × NVIDIA — for Indonesian students, researchers & journal authors</i></p>
 
-<p>
-  <a href="https://github.com/rizalfanex/skripsiku/releases">
-    <img src="https://img.shields.io/badge/Status-Beta-orange?style=for-the-badge&logo=statuspage&logoColor=white" />
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/rizalfanex/skripsiku?style=for-the-badge&color=blue" />
-  </a>
-  <img src="https://img.shields.io/badge/Lang-ID%20%2F%20EN-blueviolet?style=for-the-badge&logo=googletranslate&logoColor=white" />
-</p>
-
-<p>
-  <a href="https://nextjs.org/">
-    <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" />
-  </a>
-  <a href="https://fastapi.tiangolo.com/">
-    <img src="https://img.shields.io/badge/FastAPI-async-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
-  </a>
-  <a href="https://www.docker.com/">
-    <img src="https://img.shields.io/badge/Docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
-  </a>
-  <a href="https://integrate.api.nvidia.com/">
-    <img src="https://img.shields.io/badge/NVIDIA-Kimi_K2-76B900?style=for-the-badge&logo=nvidia&logoColor=white" />
-  </a>
-</p>
+[![Status: Beta](https://img.shields.io/badge/status-beta-orange.svg)](https://github.com/rizalfanex/skripsiku/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![Next.js 14](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED.svg)](https://www.docker.com/)
+[![NVIDIA Kimi K2](https://img.shields.io/badge/NVIDIA-Kimi_K2-76B900.svg)](https://integrate.api.nvidia.com/)
 
 <br/>
 
