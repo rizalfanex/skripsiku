@@ -1,0 +1,45 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override database path to use the named volume
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/skripsiku.db
+      # Add Docker internal network origin for CORS
+      - BACKEND_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000
+    volumes:
+      - skripsiku_db:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the Next.js bundle — browser connects to localhost:8000 (exposed port)
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+        - NEXT_PUBLIC_APP_NAME=Skripsiku
+        - NEXT_PUBLIC_APP_VERSION=1.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      # Server-side rewrite destination (Next.js server → backend container)
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  skripsiku_db:
