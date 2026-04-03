@@ -1,20 +1,60 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/status-beta-orange?style=for-the-badge" alt="Beta" />
-<img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="MIT License" />
-<img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js 14" />
-<img src="https://img.shields.io/badge/FastAPI-0.11x-009688?style=for-the-badge&logo=fastapi" alt="FastAPI" />
-<img src="https://img.shields.io/badge/NVIDIA-Kimi%20K2-76B900?style=for-the-badge&logo=nvidia" alt="NVIDIA Kimi K2" />
+```
+ ____  _        _       _        _ _
+/ ___|| | ___ _(_)_ __ (_)___ __(_) |___  _
+\___ \| |/ / '_| | '_ \| / __/ /| | / / || |
+ ___) |   <| | | | |_) | \__ \__ \ |   < \_
+|____/|_|\_\_| |_| .__/|_|___/___/_|_|\_\__,|
+                  |_|
+```
+
+### AI Academic Writing Assistant · Powered by Kimi K2 × NVIDIA
+
+<br/>
+
+<!-- Status & Version -->
+<a href="https://github.com/rizalfanex/skripsiku/releases">
+  <img src="https://img.shields.io/badge/⚡_STATUS-BETA-FF6B35?style=flat-square&labelColor=1a1a2e" alt="Beta" />
+</a>
+<a href="LICENSE">
+  <img src="https://img.shields.io/badge/📄_LICENSE-MIT-4ECDC4?style=flat-square&labelColor=1a1a2e" alt="MIT" />
+</a>
+<img src="https://img.shields.io/badge/🌏_LANG-ID_/_EN-A8DADC?style=flat-square&labelColor=1a1a2e" alt="Bilingual" />
 
 <br/><br/>
 
-# Skripsiku
+<!-- Stack -->
+<a href="https://nextjs.org/">
+  <img src="https://img.shields.io/badge/Next.js-14-ffffff?style=flat-square&logo=next.js&logoColor=white&labelColor=000000" alt="Next.js 14" />
+</a>
+<a href="https://fastapi.tiangolo.com/">
+  <img src="https://img.shields.io/badge/FastAPI-async-009688?style=flat-square&logo=fastapi&logoColor=white&labelColor=0d1117" alt="FastAPI" />
+</a>
+<a href="https://www.typescriptlang.org/">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white&labelColor=0d1117" alt="TypeScript" />
+</a>
+<a href="https://tailwindcss.com/">
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white&labelColor=0d1117" alt="Tailwind CSS" />
+</a>
+<a href="https://www.docker.com/">
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker&logoColor=white&labelColor=0d1117" alt="Docker" />
+</a>
+<a href="https://integrate.api.nvidia.com/">
+  <img src="https://img.shields.io/badge/NVIDIA-Kimi_K2-76B900?style=flat-square&logo=nvidia&logoColor=white&labelColor=0d1117" alt="NVIDIA Kimi K2" />
+</a>
 
-**AI-powered academic writing assistant for Indonesian students, researchers, and journal authors.**
+<br/><br/>
 
-> ⚠️ **This project is currently in beta.** Features may be incomplete, APIs may change, and there may be rough edges. Feedback and contributions are welcome!
+---
 
-[Demo](#) · [Report Bug](https://github.com/rizalfanex/skripsiku/issues) · [Request Feature](https://github.com/rizalfanex/skripsiku/issues)
+> ### ⚠️ This project is in **Beta**
+> Features may be incomplete, APIs may change, and rough edges exist.
+> **Feedback and contributions are warmly welcome!**
+
+<br/>
+
+**[🚀 Quick Start](#getting-started)** · **[✨ Features](#features)** · **[🐛 Report Bug](https://github.com/rizalfanex/skripsiku/issues)** · **[💡 Request Feature](https://github.com/rizalfanex/skripsiku/issues)**
 
 </div>
 
