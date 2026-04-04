@@ -129,6 +129,13 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
     setStreamingContent('');
   }, []);
 
+  const resetConversation = useCallback(() => {
+    currentConvIdRef.current = null;
+    setMessages([]);
+    setStreamingContent('');
+    setActiveStep(null);
+  }, []);
+
   return {
     messages,
     isLoading,
@@ -138,6 +145,7 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
     sendMessage,
     stopGeneration,
     clearMessages,
+    resetConversation,
     setTaskType,
   };
 }

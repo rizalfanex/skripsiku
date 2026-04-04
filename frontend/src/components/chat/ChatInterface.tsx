@@ -77,6 +77,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   const {
     user, mode, language, citationStyle, documentType,
     setMode, setLanguage, setCitationStyle,
+    triggerConversationRefresh, newChatKey,
   } = useAppStore();
 
   const [input, setInput] = useState('');
@@ -85,15 +86,16 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
   const handleConversationId = (id: string) => {
     onConversationCreated?.(id);
-    // Navigate to the permanent URL for the new conversation
+    // Update URL silently — no remount, no stream interruption
     if (!conversationId) {
-      router.replace(`/chat/${id}`);
+      window.history.replaceState(null, '', `/chat/${id}`);
+      triggerConversationRefresh();
     }
   };
 
   const {
     messages, isLoading, activeStep, streamingContent,
-    historyLoaded, sendMessage, stopGeneration, clearMessages, setTaskType,
+    historyLoaded, sendMessage, stopGeneration, clearMessages, resetConversation, setTaskType,
   } = useChat({
     conversationId,
     onConversationId: handleConversationId,
@@ -104,6 +106,14 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
+
+  // Reset conversation when new chat is triggered from sidebar
+  useEffect(() => {
+    if (newChatKey > 0) {
+      resetConversation();
+      window.history.replaceState(null, '', '/chat');
+    }
+  }, [newChatKey, resetConversation]);
 
   const handleSend = async () => {
     const text = input.trim();
@@ -130,8 +140,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
     }
   };
 
-  const ModeIcon = MODE_ICONS[mode];
-
   return (
     <div className="flex h-full flex-col">
       {/* ── Top Bar ── */}
@@ -141,24 +149,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           <span className="font-semibold text-white text-sm truncate">
             {headerTitle ?? 'Skripsiku'}
           </span>
-        </div>
-
-        {/* Mode pills */}
-        <div className="flex items-center gap-1 bg-navy-800 rounded-xl p-1 border border-primary-500/10">
-          {(Object.entries(AI_MODE_LABELS) as [AiMode, (typeof AI_MODE_LABELS)[AiMode]][]).map(([m, info]) => {
-            const Icon = MODE_ICONS[m];
-            return (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={cn('mode-pill', mode === m && 'active')}
-                title={info.description}
-              >
-                <Icon className="h-3 w-3" />
-                <span className="hidden sm:inline">{info.labelId}</span>
-              </button>
-            );
-          })}
         </div>
 
         {/* Settings */}
@@ -343,6 +333,29 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
           {/* ── Input ── */}
           <div className="border-t border-primary-500/10 p-4">
+
+            {/* Mode selector — right above the textarea */}
+            <div className="flex items-center gap-1.5 mb-2.5">
+              {(Object.entries(AI_MODE_LABELS) as [AiMode, (typeof AI_MODE_LABELS)[AiMode]][]).map(([m, info]) => {
+                const Icon = MODE_ICONS[m];
+                return (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    disabled={isLoading}
+                    className={cn('mode-pill', mode === m && 'active')}
+                    title={info.description}
+                  >
+                    <Icon className="h-3 w-3" />
+                    <span>{info.labelId}</span>
+                  </button>
+                );
+              })}
+              <span className="ml-auto text-[11px] text-slate-600 hidden sm:block">
+                {AI_MODE_LABELS[mode].description}
+              </span>
+            </div>
+
             <div className="flex gap-3 items-end">
               <div className="flex-1 relative">
                 <TextareaAutosize
@@ -373,14 +386,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   <Send className="h-4 w-4" />
                 </button>
               )}
-            </div>
-            <div className="flex items-center gap-2 mt-2 px-1">
-              <ModeIcon className={cn('h-3 w-3', AI_MODE_LABELS[mode].color)} />
-              <span className="text-xs text-slate-500">
-                Mode: <span className={AI_MODE_LABELS[mode].color}>{AI_MODE_LABELS[mode].labelId}</span>
-                {' · '}
-                <span className="text-slate-600">{AI_MODE_LABELS[mode].description}</span>
-              </span>
             </div>
           </div>
         </div>

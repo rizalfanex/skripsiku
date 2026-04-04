@@ -35,6 +35,12 @@ interface AppState {
   settingsPanelOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   setSettingsPanelOpen: (open: boolean) => void;
+
+  // ── Conversation signals (not persisted) ──────────────────
+  conversationRefreshKey: number;
+  newChatKey: number;
+  triggerConversationRefresh: () => void;
+  triggerNewChat: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -86,6 +92,12 @@ export const useAppStore = create<AppState>()(
       settingsPanelOpen: false,
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
       setSettingsPanelOpen: (settingsPanelOpen) => set({ settingsPanelOpen }),
+
+      // Conversation signals
+      conversationRefreshKey: 0,
+      newChatKey: 0,
+      triggerConversationRefresh: () => set((s) => ({ conversationRefreshKey: s.conversationRefreshKey + 1 })),
+      triggerNewChat: () => set((s) => ({ newChatKey: s.newChatKey + 1 })),
     }),
     {
       name: 'skripsiku-store',

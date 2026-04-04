@@ -87,11 +87,8 @@ def _model_for_mode(mode: AiMode, step: str = "main") -> str:
 
 
 def _max_tokens(mode: AiMode) -> int:
-    return {
-        "instant": settings.llm_max_tokens_instant,
-        "thinking_standard": settings.llm_max_tokens_thinking,
-        "thinking_extended": settings.llm_max_tokens_extended,
-    }[mode]
+    # All modes share the same token budget — differentiation is algorithmic, not by limit.
+    return settings.llm_max_tokens_instant  # all equal (4096 by default)
 
 
 def _temperature(mode: AiMode) -> float:
@@ -195,11 +192,27 @@ class AcademicOrchestrator:
     async def _thinking_standard(
         self, messages: list[dict], ctx: dict
     ) -> AsyncIterator[str]:
+        """
+        Chain-of-Thought (CoT) strategy:
+        The model is instructed to reason step-by-step before giving the final answer.
+        Same token budget as Instant, but deeper output via structured reasoning prompt.
+        """
         model = _model_for_mode("thinking_standard", "main")
         system_prompt = self.builder.build_system_prompt(**ctx)
         analysis_prompt = self.builder.build_analysis_overlay(**ctx)
+
+        cot_instruction = (
+            "\n\nApply explicit Chain-of-Thought reasoning:\n"
+            "1. **Understand** — Restate the core academic problem in your own words.\n"
+            "2. **Analyze** — Break down the relevant components, arguments, or gaps.\n"
+            "3. **Reason** — Evaluate each component with academic rigor and evidence-based thinking.\n"
+            "4. **Synthesize** — Draw conclusions that are cohesive and grounded.\n"
+            "5. **Respond** — Deliver the final academic output based on your reasoning chain.\n\n"
+            "Think through each step methodically before writing your answer."
+        )
+
         full_messages = (
-            [{"role": "system", "content": system_prompt + "\n\n" + analysis_prompt}]
+            [{"role": "system", "content": system_prompt + "\n\n" + analysis_prompt + cot_instruction}]
             + messages
         )
 
@@ -224,26 +237,28 @@ class AcademicOrchestrator:
         self, messages: list[dict], ctx: dict
     ) -> AsyncIterator[str]:
         """
-        Pipeline:
-          Step 1: kimi-k2-instruct  → structured initial draft
-          Step 2: kimi-k2-thinking  → deep academic critique + reasoning
-          Step 3: kimi-k2-instruct  → polished final revision
+        Multi-step CoT pipeline — same token budget per step as other modes.
+        Algorithmic differentiation:
+          Step 1: Instruct model  → structured initial draft (CoT: outline → draft)
+          Step 2: Thinking model  → rigorous academic critique (CoT: evaluate → critique)
+          Step 3: Instruct model  → final polished revision incorporating all feedback
         """
         instruct_model = settings.model_instant
         thinking_model = settings.model_thinking_extended
         system_prompt = self.builder.build_system_prompt(**ctx)
+        step_tokens = settings.llm_max_tokens_extended  # same budget per step
 
         # ── Step 1: Draft ────────────────────────────────────────────────────
         yield _sse({"type": "start", "step": "initial_draft", "model": instruct_model})
 
         draft_messages = [
-            {"role": "system", "content": system_prompt + "\n\nYour task in this step: produce a well-structured initial draft. Be comprehensive but leave room for refinement. Label your output with ## Initial Draft."},
+            {"role": "system", "content": system_prompt + "\n\nChain-of-Thought Step 1 — DRAFT: First outline the key structure, then write a well-organised initial draft. Be comprehensive. Label your output with ## Initial Draft."},
             *messages,
         ]
         draft_stream = await nvidia_provider.complete(
             model=instruct_model,
             messages=draft_messages,
-            max_tokens=settings.llm_max_tokens_instant,
+            max_tokens=step_tokens,
             temperature=settings.llm_temperature_instant,
             stream=True,
         )
@@ -276,7 +291,7 @@ class AcademicOrchestrator:
         critique_stream = await nvidia_provider.complete(
             model=thinking_model,
             messages=reasoning_messages,
-            max_tokens=settings.llm_max_tokens_thinking,
+            max_tokens=step_tokens,
             temperature=settings.llm_temperature_thinking,
             stream=True,
         )
@@ -291,19 +306,19 @@ class AcademicOrchestrator:
         yield _sse({"type": "start", "step": "final_revision", "model": instruct_model})
 
         revision_messages = [
-            {"role": "system", "content": system_prompt + "\n\nYour final task: produce the polished, publication-ready version incorporating the critique. Do NOT include the draft or critique sections — only the final, clean, improved output."},
+            {"role": "system", "content": system_prompt + "\n\nChain-of-Thought Step 3 — FINAL REVISION: You have a draft and a critique. Produce the final, publication-ready version that fully incorporates the critique's improvements. Output ONLY the final version — no draft, no critique headers."},
             *messages,
             {"role": "assistant", "content": f"## Initial Draft\n{draft_content}"},
             {"role": "assistant", "content": f"## Academic Critique\n{critique_content}"},
             {
                 "role": "user",
-                "content": "Now write the final, polished version incorporating all improvements. This is the version the user will use. Make it excellent.",
+                "content": "Now write the final, polished version incorporating all improvements. Output only the final version.",
             },
         ]
         final_stream = await nvidia_provider.complete(
             model=instruct_model,
             messages=revision_messages,
-            max_tokens=settings.llm_max_tokens_extended,
+            max_tokens=step_tokens,
             temperature=settings.llm_temperature_extended,
             stream=True,
         )
