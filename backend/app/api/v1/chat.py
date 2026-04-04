@@ -106,6 +106,7 @@ async def chat_stream(
 
     async def event_generator():
         full_content = ""
+        full_thinking = ""
         complete_event: str | None = None
 
         # Send conversation_id immediately so the frontend can track/navigate
@@ -127,8 +128,9 @@ async def chat_stream(
                     event = json.loads(chunk.replace("data: ", "").strip())
                     if event.get("type") == "chunk":
                         full_content += event.get("content", "")
+                    elif event.get("type") == "thinking_chunk":
+                        full_thinking += event.get("content", "")
                     if event.get("type") == "complete":
-                        # Hold back 'complete' until DB is saved to prevent race condition
                         complete_event = chunk
                         continue
                 except Exception:

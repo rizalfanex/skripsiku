@@ -248,11 +248,12 @@ class AcademicOrchestrator:
         system_prompt = self.builder.build_system_prompt(**ctx)
         step_tokens = settings.llm_max_tokens_extended  # same budget per step
 
-        # ── Step 1: Draft ────────────────────────────────────────────────────
+        # ── Step 1: Draft (thinking process — hidden by default on frontend) ───
+        yield _sse({"type": "thinking_start", "step": "initial_draft"})
         yield _sse({"type": "start", "step": "initial_draft", "model": instruct_model})
 
         draft_messages = [
-            {"role": "system", "content": system_prompt + "\n\nChain-of-Thought Step 1 — DRAFT: First outline the key structure, then write a well-organised initial draft. Be comprehensive. Label your output with ## Initial Draft."},
+            {"role": "system", "content": system_prompt + "\n\nStep 1 — Draft: Outline the structure then write a comprehensive initial draft."},
             *messages,
         ]
         draft_stream = await nvidia_provider.complete(
@@ -265,11 +266,11 @@ class AcademicOrchestrator:
         draft_content = ""
         async for chunk in draft_stream:
             draft_content += chunk
-            yield _sse({"type": "chunk", "content": chunk})
+            yield _sse({"type": "thinking_chunk", "content": chunk, "step": "initial_draft"})
 
         yield _sse({"type": "step_complete", "step": "initial_draft"})
 
-        # ── Step 2: Deep Reasoning ───────────────────────────────────────────
+        # ── Step 2: Deep Reasoning (thinking process — hidden by default) ────
         analysis_prompt = self.builder.build_analysis_overlay(**ctx)
         yield _sse({"type": "start", "step": "academic_reasoning", "model": thinking_model})
 
@@ -280,11 +281,10 @@ class AcademicOrchestrator:
             {
                 "role": "user",
                 "content": (
-                    "Now perform a rigorous academic review of your draft above. "
+                    "Perform a rigorous academic review of the draft. "
                     "Identify: (1) logical weaknesses, (2) missing evidence, "
-                    "(3) structural improvements, (4) contribution clarity issues, "
-                    "(5) language/style refinements needed. "
-                    "Be specific and constructive. Label this ## Academic Critique."
+                    "(3) structural improvements, (4) contribution clarity, "
+                    "(5) language/style refinements. Be specific."
                 ),
             },
         ]
@@ -298,21 +298,22 @@ class AcademicOrchestrator:
         critique_content = ""
         async for chunk in critique_stream:
             critique_content += chunk
-            yield _sse({"type": "chunk", "content": chunk})
+            yield _sse({"type": "thinking_chunk", "content": chunk, "step": "academic_reasoning"})
 
         yield _sse({"type": "step_complete", "step": "academic_reasoning"})
+        yield _sse({"type": "thinking_end"})
 
-        # ── Step 3: Final Revision ───────────────────────────────────────────
+        # ── Step 3: Final Revision (main answer — visible to user) ───────────
         yield _sse({"type": "start", "step": "final_revision", "model": instruct_model})
 
         revision_messages = [
-            {"role": "system", "content": system_prompt + "\n\nChain-of-Thought Step 3 — FINAL REVISION: You have a draft and a critique. Produce the final, publication-ready version that fully incorporates the critique's improvements. Output ONLY the final version — no draft, no critique headers."},
+            {"role": "system", "content": system_prompt + "\n\nYou have completed a draft and academic critique. Now produce the final, publication-ready version incorporating all improvements. Output ONLY the final version."},
             *messages,
-            {"role": "assistant", "content": f"## Initial Draft\n{draft_content}"},
-            {"role": "assistant", "content": f"## Academic Critique\n{critique_content}"},
+            {"role": "assistant", "content": f"## Draft\n{draft_content}"},
+            {"role": "assistant", "content": f"## Critique\n{critique_content}"},
             {
                 "role": "user",
-                "content": "Now write the final, polished version incorporating all improvements. Output only the final version.",
+                "content": "Write the final polished version incorporating all improvements. Output only the final version.",
             },
         ]
         final_stream = await nvidia_provider.complete(

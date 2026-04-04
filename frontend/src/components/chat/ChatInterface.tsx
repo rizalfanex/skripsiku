@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
-  Zap, Brain, Star, RotateCcw, Copy, Check, MessageSquarePlus,
+  Zap, Brain, Star, RotateCcw, Copy, Check, MessageSquarePlus, ChevronDown,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -45,6 +45,40 @@ const MODE_ICONS: Record<AiMode, React.ComponentType<{ className?: string }>> = 
   thinking_standard: Brain,
   thinking_extended: Star,
 };
+
+// ── Thinking Panel ──────────────────────────────────────────────────────────
+function ThinkingPanel({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
+  const [open, setOpen] = useState(isStreaming ?? false);
+  // Auto-open while streaming, keep whatever state after done
+  useEffect(() => {
+    if (isStreaming) setOpen(true);
+  }, [isStreaming]);
+
+  return (
+    <div className="mt-2 rounded-xl border border-primary-500/10 bg-navy-950/60 overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+      >
+        <Brain className="h-3 w-3 text-primary-400 flex-shrink-0" />
+        <span className="flex-1 text-left">
+          {isStreaming ? 'Sedang berpikir...' : 'Lihat proses berpikir'}
+        </span>
+        {isStreaming && <ThinkingDots />}
+        <ChevronDown
+          className={cn('h-3 w-3 ml-1 transition-transform duration-200', open && 'rotate-180')}
+        />
+      </button>
+      {open && (
+        <div className="px-3 pb-3 text-xs text-slate-500 max-h-64 overflow-y-auto scrollbar-hide border-t border-primary-500/10 pt-2">
+          <div className="prose-academic opacity-80">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
@@ -93,6 +127,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
   const {
     messages, isLoading, activeStep, streamingContent,
+    streamingThinking, isThinking,
     historyLoaded, sendMessage, stopGeneration, clearMessages, setTaskType,
   } = useChat({
     conversationId,
@@ -242,7 +277,10 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     ) : (
                       <>
-                        <div className="prose-academic">
+                        {msg.thinkingContent && (
+                          <ThinkingPanel content={msg.thinkingContent} />
+                        )}
+                        <div className={cn('prose-academic', msg.thinkingContent && 'mt-3')}>
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                         </div>
                         <div className="flex justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -271,7 +309,13 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                     <BookOpen className="h-4 w-4 text-white" />
                   </div>
                   <div className="max-w-2xl rounded-2xl rounded-tl-sm bg-navy-800 border border-primary-500/10 px-4 py-3 text-sm flex-1">
-                    {activeStep && (
+                    {/* Thinking panel: shows steps 1 & 2 content during thinking_extended */}
+                    {(isThinking || streamingThinking) && (
+                      <ThinkingPanel content={streamingThinking} isStreaming={isThinking} />
+                    )}
+
+                    {/* Active step label when NOT in thinking phase (step 3 / final revision) */}
+                    {activeStep && !isThinking && !streamingThinking && (
                       <div className="flex items-center gap-2 mb-3">
                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-500/10 border border-primary-500/20">
                           <ThinkingDots />
@@ -285,17 +329,18 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                         </div>
                       </div>
                     )}
+
                     {streamingContent ? (
-                      <div className="prose-academic">
+                      <div className={cn('prose-academic', (isThinking || streamingThinking) && 'mt-3')}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
                         <span className="typing-cursor" />
                       </div>
-                    ) : (
+                    ) : !isThinking && !streamingThinking ? (
                       <div className="flex items-center gap-2 text-slate-400">
                         <ThinkingDots />
                         <span className="text-xs">Sedang memproses...</span>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </motion.div>
               )}

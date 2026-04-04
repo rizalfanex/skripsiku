@@ -92,6 +92,8 @@ export interface ProjectCreate {
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  /** Accumulated thinking/reasoning steps (thinking_extended mode only). Hidden by default. */
+  thinkingContent?: string;
 }
 
 export interface Message extends ChatMessage {

@@ -23,6 +23,8 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
   const [isLoading, setIsLoading] = useState(false);
   const [activeStep, setActiveStep] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState('');
+  const [streamingThinking, setStreamingThinking] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const currentConvIdRef = useRef<string | null>(conversationId ?? null);
@@ -59,6 +61,8 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
       setMessages(newMessages);
       setIsLoading(true);
       setStreamingContent('');
+      setStreamingThinking('');
+      setIsThinking(false);
       setActiveStep(null);
 
       const controller = new AbortController();
@@ -66,6 +70,7 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
 
       try {
         let fullContent = '';
+        let thinkingContent = '';
 
         for await (const event of streamChat(
           {
@@ -83,25 +88,35 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
           controller.signal
         )) {
           if (event.type === 'meta' && event.conversation_id) {
-            // Store conv ID immediately so subsequent messages use it, but delay
-            // navigation until 'complete' — stream must not be interrupted by remount.
             if (!currentConvIdRef.current) {
               currentConvIdRef.current = event.conversation_id;
               pendingConvIdRef.current = event.conversation_id;
             }
+          } else if (event.type === 'thinking_start') {
+            setIsThinking(true);
+          } else if (event.type === 'thinking_chunk') {
+            thinkingContent += event.content ?? '';
+            setStreamingThinking(thinkingContent);
+          } else if (event.type === 'thinking_end') {
+            setIsThinking(false);
           } else if (event.type === 'start') {
             setActiveStep(event.step ?? null);
           } else if (event.type === 'chunk') {
             fullContent += event.content ?? '';
             setStreamingContent(fullContent);
           } else if (event.type === 'step_complete') {
-            // continue streaming
+            // continue
           } else if (event.type === 'complete') {
-            const assistantMsg: ChatMessage = { role: 'assistant', content: fullContent };
+            const assistantMsg: ChatMessage = {
+              role: 'assistant',
+              content: fullContent,
+              thinkingContent: thinkingContent || undefined,
+            };
             setMessages((prev) => [...prev, assistantMsg]);
             setStreamingContent('');
+            setStreamingThinking('');
+            setIsThinking(false);
             setActiveStep(null);
-            // Now it's safe to navigate — DB is already written before backend sends 'complete'
             if (pendingConvIdRef.current) {
               onConversationId?.(pendingConvIdRef.current);
               pendingConvIdRef.current = null;
@@ -118,6 +133,7 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
       } finally {
         setIsLoading(false);
         setActiveStep(null);
+        setIsThinking(false);
         abortRef.current = null;
       }
     },
@@ -141,6 +157,8 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
     isLoading,
     activeStep,
     streamingContent,
+    streamingThinking,
+    isThinking,
     historyLoaded,
     sendMessage,
     stopGeneration,
