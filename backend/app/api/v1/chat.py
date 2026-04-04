@@ -106,6 +106,7 @@ async def chat_stream(
 
     async def event_generator():
         full_content = ""
+        complete_event: str | None = None
 
         # Send conversation_id immediately so the frontend can track/navigate
         if conversation:
@@ -126,11 +127,15 @@ async def chat_stream(
                     event = json.loads(chunk.replace("data: ", "").strip())
                     if event.get("type") == "chunk":
                         full_content += event.get("content", "")
+                    if event.get("type") == "complete":
+                        # Hold back 'complete' until DB is saved to prevent race condition
+                        complete_event = chunk
+                        continue
                 except Exception:
                     pass
                 yield chunk
 
-        finally:
+            # Save to DB BEFORE yielding complete so history is available immediately on navigation
             if full_content and current_user and conversation:
                 try:
                     assistant_msg = Message(
@@ -141,7 +146,6 @@ async def chat_stream(
                         task_type=body.task_type,
                     )
                     db.add(assistant_msg)
-                    # Generate title on first exchange
                     if is_new_conversation and not conversation.title:
                         conversation.title = _make_title(user_message_content)
                     conversation.updated_at = datetime.now(timezone.utc)
@@ -149,6 +153,14 @@ async def chat_stream(
                 except Exception as exc:
                     logger.error("Failed to persist assistant message: %s", exc)
                     await db.rollback()
+
+            # Now signal the frontend that everything is done and persisted
+            if complete_event:
+                yield complete_event
+
+        except Exception as exc:
+            logger.exception("Stream error: %s", exc)
+            yield f"data: {json.dumps({'type': 'error', 'message': str(exc)})}\n\n"
 
     return StreamingResponse(
         event_generator(),

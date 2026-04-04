@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -77,25 +77,23 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   const {
     user, mode, language, citationStyle, documentType,
     setMode, setLanguage, setCitationStyle,
-    triggerConversationRefresh, newChatKey,
   } = useAppStore();
 
   const [input, setInput] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const handleConversationId = (id: string) => {
+  const handleConversationId = useCallback((id: string) => {
     onConversationCreated?.(id);
-    // Update URL silently — no remount, no stream interruption
+    // Stream is already complete when this fires, so navigation is safe.
     if (!conversationId) {
-      window.history.replaceState(null, '', `/chat/${id}`);
-      triggerConversationRefresh();
+      router.replace(`/chat/${id}`);
     }
-  };
+  }, [conversationId, onConversationCreated, router]);
 
   const {
     messages, isLoading, activeStep, streamingContent,
-    historyLoaded, sendMessage, stopGeneration, clearMessages, resetConversation, setTaskType,
+    historyLoaded, sendMessage, stopGeneration, clearMessages, setTaskType,
   } = useChat({
     conversationId,
     onConversationId: handleConversationId,
@@ -106,14 +104,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
-
-  // Reset conversation when new chat is triggered from sidebar
-  useEffect(() => {
-    if (newChatKey > 0) {
-      resetConversation();
-      window.history.replaceState(null, '', '/chat');
-    }
-  }, [newChatKey, resetConversation]);
 
   const handleSend = async () => {
     const text = input.trim();

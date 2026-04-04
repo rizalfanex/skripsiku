@@ -45,11 +45,11 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, sidebarOpen, setSidebarOpen, conversationRefreshKey, triggerNewChat } = useAppStore();
+  const { user, sidebarOpen, setSidebarOpen } = useAppStore();
   const { conversations, refresh, remove } = useConversations();
 
-  // Refresh conversation list on navigation OR when a new conversation was created (via replaceState)
-  useEffect(() => { refresh(); }, [pathname, conversationRefreshKey, refresh]);
+  // Refresh conversation list on any navigation
+  useEffect(() => { refresh(); }, [pathname, refresh]);
 
   const groups = useMemo(() => groupConversations(conversations), [conversations]);
 
@@ -92,14 +92,7 @@ export function Sidebar() {
         {/* Chat Baru CTA */}
         <div className="p-3">
           <button
-            onClick={() => {
-              // If URL is already /chat (real or via replaceState), reset in-place
-              if (window.location.pathname === '/chat') {
-                triggerNewChat();
-              } else {
-                router.push('/chat');
-              }
-            }}
+            onClick={() => router.push('/chat')}
             className={cn(
               'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200',
               'bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 border border-primary-500/20'

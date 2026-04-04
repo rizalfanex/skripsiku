@@ -26,6 +26,7 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const currentConvIdRef = useRef<string | null>(conversationId ?? null);
+  const pendingConvIdRef = useRef<string | null>(null);
 
   // Load conversation history from backend when conversationId is provided
   useEffect(() => {
@@ -82,10 +83,11 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
           controller.signal
         )) {
           if (event.type === 'meta' && event.conversation_id) {
-            // Backend assigned a conversation_id (new or existing)
+            // Store conv ID immediately so subsequent messages use it, but delay
+            // navigation until 'complete' — stream must not be interrupted by remount.
             if (!currentConvIdRef.current) {
               currentConvIdRef.current = event.conversation_id;
-              onConversationId?.(event.conversation_id);
+              pendingConvIdRef.current = event.conversation_id;
             }
           } else if (event.type === 'start') {
             setActiveStep(event.step ?? null);
@@ -99,6 +101,11 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
             setMessages((prev) => [...prev, assistantMsg]);
             setStreamingContent('');
             setActiveStep(null);
+            // Now it's safe to navigate — DB is already written before backend sends 'complete'
+            if (pendingConvIdRef.current) {
+              onConversationId?.(pendingConvIdRef.current);
+              pendingConvIdRef.current = null;
+            }
           } else if (event.type === 'error') {
             onError?.(event.message ?? 'Unknown error');
             break;
@@ -129,13 +136,6 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
     setStreamingContent('');
   }, []);
 
-  const resetConversation = useCallback(() => {
-    currentConvIdRef.current = null;
-    setMessages([]);
-    setStreamingContent('');
-    setActiveStep(null);
-  }, []);
-
   return {
     messages,
     isLoading,
@@ -145,7 +145,6 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
     sendMessage,
     stopGeneration,
     clearMessages,
-    resetConversation,
     setTaskType,
   };
 }
