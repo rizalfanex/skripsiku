@@ -41,6 +41,106 @@ const QUICK_ACTIONS: { taskType: TaskType; label: string; icon: string; mode: Ai
 ];
 
 // ── Thinking Panel ──────────────────────────────────────────────────────────
+// ── Typewriter Empty State ───────────────────────────────────────────────────
+const ROTATING_PROMPTS = [
+  'Tulis ulang paragraf ini agar terdengar lebih akademis dan formal.',
+  'Identifikasi celah penelitian dari tinjauan pustaka berikut.',
+  'Perkuat pernyataan kebaruan (novelty) dalam pendahuluan saya.',
+  'Perbaiki bagian metodologi agar lebih sistematis dan terstruktur.',
+  'Buat abstrak jurnal dari bab hasil dan pembahasan saya.',
+  'Tajamkan judul skripsi agar lebih spesifik dan bernilai ilmiah.',
+  'Perkuat argumen dalam bagian diskusi penelitian saya.',
+  'Poles simpulan agar lebih padat, tegas, dan berdampak.',
+  'Tingkatkan koherensi antara pendahuluan, metode, dan temuan.',
+  'Parafraskan kalimat ini agar lebih orisinal dan ilmiah.',
+];
+
+const TYPING_SPEED = 38;
+const DELETE_SPEED  = 22;
+const PAUSE_AFTER   = 2200;
+const PAUSE_BEFORE  = 400;
+
+function EmptyState() {
+  const [displayed, setDisplayed] = useState('');
+  const [promptIdx, setPromptIdx] = useState(0);
+  const [phase, setPhase] = useState<'typing' | 'pausing' | 'deleting' | 'waiting'>('typing');
+  const [caretVisible, setCaretVisible] = useState(true);
+
+  // Caret blink
+  useEffect(() => {
+    const id = setInterval(() => setCaretVisible((v) => !v), 530);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const target = ROTATING_PROMPTS[promptIdx];
+
+    if (phase === 'typing') {
+      if (displayed.length < target.length) {
+        const id = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), TYPING_SPEED);
+        return () => clearTimeout(id);
+      } else {
+        const id = setTimeout(() => setPhase('pausing'), PAUSE_AFTER);
+        return () => clearTimeout(id);
+      }
+    }
+
+    if (phase === 'pausing') {
+      const id = setTimeout(() => setPhase('deleting'), 0);
+      return () => clearTimeout(id);
+    }
+
+    if (phase === 'deleting') {
+      if (displayed.length > 0) {
+        const id = setTimeout(() => setDisplayed((d) => d.slice(0, -1)), DELETE_SPEED);
+        return () => clearTimeout(id);
+      } else {
+        const id = setTimeout(() => {
+          setPromptIdx((i) => (i + 1) % ROTATING_PROMPTS.length);
+          setPhase('typing');
+        }, PAUSE_BEFORE);
+        return () => clearTimeout(id);
+      }
+    }
+  }, [displayed, phase, promptIdx]);
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12 select-none">
+      {/* Logo mark */}
+      <div className="relative mb-8">
+        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-50 to-slate-100 border border-slate-200 shadow-sm flex items-center justify-center">
+          <BookOpen className="h-9 w-9 text-indigo-400" strokeWidth={1.5} />
+        </div>
+        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[8px] font-bold text-white shadow">AI</span>
+      </div>
+
+      {/* Headline */}
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-2">
+        Selamat datang di <span className="text-indigo-500">Skripsiku</span>
+      </h2>
+      <p className="text-sm text-slate-400 max-w-sm leading-relaxed mb-10">
+        Asisten akademik AI untuk mahasiswa. Tulis, analisis, perbaiki, dan sempurnakan karya ilmiah Anda.
+      </p>
+
+      {/* Typewriter prompt */}
+      <div className="w-full max-w-lg min-h-[3rem] flex items-center justify-center">
+        <p className="text-[15px] text-slate-500 leading-relaxed font-normal">
+          {displayed}
+          <span
+            className="inline-block w-[1.5px] h-[1.1em] bg-indigo-400 ml-[2px] align-middle"
+            style={{ opacity: caretVisible ? 1 : 0, transition: 'opacity 0.1s' }}
+          />
+        </p>
+      </div>
+
+      {/* Tagline */}
+      <p className="mt-12 text-[11px] text-slate-300 tracking-widest uppercase font-medium">
+        Powered by <span className="text-indigo-300">Rizalfanex</span>&nbsp;&nbsp;·&nbsp;&nbsp;Designed for Academics
+      </p>
+    </div>
+  );
+}
+
 // ── Thinking Drawer (slide-in side panel) ───────────────────────────────────
 interface ThinkingDrawerProps {
   content: string;
@@ -353,47 +453,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
             {/* Empty state */}
             {historyLoaded && messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12 select-none">
-                {/* Logo mark */}
-                <div className="relative mb-8">
-                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-50 to-slate-100 border border-slate-200 shadow-sm flex items-center justify-center">
-                    <BookOpen className="h-9 w-9 text-indigo-400" strokeWidth={1.5} />
-                  </div>
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[8px] font-bold text-white shadow">AI</span>
-                </div>
-
-                {/* Headline */}
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-2">
-                  Selamat datang di <span className="text-indigo-500">Skripsiku</span>
-                </h2>
-                <p className="text-sm text-slate-400 max-w-sm leading-relaxed mb-10">
-                  Asisten akademik AI untuk mahasiswa. Tulis, analisis, perbaiki, dan sempurnakan karya ilmiah Anda.
-                </p>
-
-                {/* Suggestion chips */}
-                <div className="flex flex-col gap-2 w-full max-w-md">
-                  {[
-                    { icon: '✍️', text: 'Tulis ulang paragraf saya agar lebih akademis' },
-                    { icon: '🔍', text: 'Analisis celah penelitian dari tinjauan pustaka saya' },
-                    { icon: '📝', text: 'Buat abstrak jurnal dari bab hasil & pembahasan saya' },
-                  ].map((s) => (
-                    <button
-                      key={s.text}
-                      onClick={() => setInput(s.text)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-slate-800 transition-all text-left shadow-sm group"
-                    >
-                      <span className="text-base flex-shrink-0">{s.icon}</span>
-                      <span className="flex-1 leading-snug">{s.text}</span>
-                      <Send className="h-3.5 w-3.5 text-slate-300 group-hover:text-indigo-400 flex-shrink-0 transition-colors" />
-                    </button>
-                  ))}
-                </div>
-
-                {/* Tagline */}
-                <p className="mt-10 text-[11px] text-slate-300 tracking-widest uppercase font-medium letter-spacing-widest">
-                  Powered by <span className="text-indigo-300">Rizalfanex</span> &nbsp;·&nbsp; Designed for Academics
-                </p>
-              </div>
+              <EmptyState />
             )}
 
             <AnimatePresence mode="popLayout">
