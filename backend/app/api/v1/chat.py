@@ -144,7 +144,8 @@ async def chat_stream(
                     db.add(assistant_msg)
 
                     if is_new_conversation and not conversation.title:
-                        conversation.title = await _generate_ai_title(user_message_content, full_content)
+                        # Use instant truncation title — avoids async LLM call inside generator
+                        conversation.title = _make_title(user_message_content)
 
                     conversation.updated_at = datetime.now(timezone.utc)
                     await db.commit()
@@ -153,7 +154,7 @@ async def chat_stream(
                         yield f"data: {json.dumps({'type': 'title_update', 'title': conversation.title, 'conversation_id': conversation.id})}\n\n"
 
                 except Exception as exc:
-                    logger.error("Failed to persist assistant message: %s", exc)
+                    logger.error("Failed to persist assistant message: %s", exc, exc_info=True)
                     await db.rollback()
 
             if complete_event:
