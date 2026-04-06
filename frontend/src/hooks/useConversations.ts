@@ -1,32 +1,26 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { conversationsApi } from '@/lib/api';
-import { Conversation } from '@/lib/types';
+import { useAppStore } from '@/store/useAppStore';
 
 export function useConversations() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    sidebarConversations: conversations,
+    setSidebarConversations,
+    removeSidebarConversation,
+  } = useAppStore();
+
   const fetchedRef = useRef(false);
 
   const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
     try {
       const data = await conversationsApi.list();
-      setConversations(data);
-    } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status !== 401) {
-        // Only wipe the list for non-auth errors
-        setConversations([]);
-      }
-      setError(status === 401 ? 'unauthenticated' : 'error');
-    } finally {
-      setIsLoading(false);
+      setSidebarConversations(data);
+    } catch {
+      // silently ignore — existing list stays visible
     }
-  }, []);
+  }, [setSidebarConversations]);
 
   useEffect(() => {
     if (!fetchedRef.current) {
@@ -39,15 +33,15 @@ export function useConversations() {
 
   const remove = useCallback(
     async (id: string) => {
+      removeSidebarConversation(id); // optimistic
       try {
         await conversationsApi.delete(id);
-        setConversations((prev) => prev.filter((c) => c.id !== id));
       } catch {
-        // ignore
+        load(); // rollback by re-fetching
       }
     },
-    []
+    [removeSidebarConversation, load]
   );
 
-  return { conversations, isLoading, error, refresh, remove };
+  return { conversations, refresh, remove };
 }

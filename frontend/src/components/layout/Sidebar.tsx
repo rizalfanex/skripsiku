@@ -45,11 +45,11 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, setSidebarOpen, conversationRefreshAt } = useAppStore();
+  const { sidebarOpen, setSidebarOpen } = useAppStore();
   const { conversations, refresh, remove } = useConversations();
 
-  // Refresh on navigation or whenever a new conversation is created
-  useEffect(() => { refresh(); }, [pathname, conversationRefreshAt, refresh]);
+  // Re-fetch from API on navigation to keep list in sync with server
+  useEffect(() => { refresh(); }, [pathname, refresh]);
 
   const groups = useMemo(() => groupConversations(conversations), [conversations]);
 

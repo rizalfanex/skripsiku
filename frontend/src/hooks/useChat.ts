@@ -18,7 +18,8 @@ interface UseChatOptions {
 export function useChat({ conversationId, onConversationId, onTitleUpdate, onError }: UseChatOptions = {}) {
   const {
     mode, language, citationStyle, documentType, taskType, setTaskType,
-    activeProject, academicField, triggerConversationRefresh,
+    activeProject, academicField,
+    triggerConversationRefresh, upsertSidebarConversation,
   } = useAppStore();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -93,8 +94,15 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
             if (!currentConvIdRef.current) {
               currentConvIdRef.current = event.conversation_id;
               pendingConvIdRef.current = event.conversation_id;
-              // Conversation is already in DB at this point — refresh sidebar immediately
-              triggerConversationRefresh();
+              // Inject placeholder immediately — conversation IS in DB at this point
+              upsertSidebarConversation({
+                id: event.conversation_id,
+                title: null,
+                project_id: activeProject?.id ?? null,
+                mode,
+                task_type: taskType,
+                language,
+              });
             }
           } else if (event.type === 'thinking_start') {
             setIsThinking(true);
@@ -111,7 +119,8 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
           } else if (event.type === 'title_update') {
             if (event.title && event.conversation_id) {
               onTitleUpdate?.(event.title, event.conversation_id);
-              triggerConversationRefresh(); // refresh so sidebar shows the real title
+              // Update the title in the sidebar list directly
+              upsertSidebarConversation({ id: event.conversation_id, title: event.title });
             }
           } else if (event.type === 'step_complete') {
             // continue
@@ -149,7 +158,7 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
     [
       isLoading, messages, mode, language, citationStyle, documentType,
       taskType, activeProject, academicField, onConversationId, onTitleUpdate, onError,
-      triggerConversationRefresh,
+      upsertSidebarConversation,
     ]
   );
 
