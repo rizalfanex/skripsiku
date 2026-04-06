@@ -325,7 +325,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
                         <span className="typing-cursor" />
                       </div>
-                      </div>
                     ) : !isThinking && !streamingThinking ? (
                       <div className="flex items-center gap-2 text-slate-400">
                         <ThinkingDots />
