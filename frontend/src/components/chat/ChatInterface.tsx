@@ -264,40 +264,23 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   key={i}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={cn('flex gap-3', msg.role === 'user' ? 'justify-end' : 'justify-start')}
+                  className={cn(msg.role === 'user' ? 'flex justify-end' : 'w-full')}
                 >
-                  {msg.role === 'assistant' && (
-                    <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                      <BookOpen className="h-4 w-4 text-indigo-600" />
-                    </div>
-                  )}
-                  <div
-                    className={cn(
-                      'max-w-2xl rounded-2xl px-4 py-3 text-sm relative group',
-                      msg.role === 'user'
-                        ? 'bg-indigo-50 border border-indigo-200 text-slate-800 rounded-tr-sm'
-                        : 'bg-white border border-slate-200 rounded-tl-sm shadow-sm'
-                    )}
-                  >
-                    {msg.role === 'user' ? (
+                  {msg.role === 'user' ? (
+                    <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm bg-indigo-50 border border-indigo-200 text-slate-800">
                       <p className="whitespace-pre-wrap">{msg.content}</p>
-                    ) : (
-                      <>
-                        {msg.thinkingContent && (
-                          <ThinkingPanel content={msg.thinkingContent} />
-                        )}
-                        <div className={cn('prose-academic', msg.thinkingContent && 'mt-3')}>
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                        </div>
-                        <div className="flex justify-end mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <CopyButton content={msg.content} />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  {msg.role === 'user' && (
-                    <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-600">
-                      U
+                    </div>
+                  ) : (
+                    <div className="w-full text-sm relative group">
+                      {msg.thinkingContent && (
+                        <ThinkingPanel content={msg.thinkingContent} />
+                      )}
+                      <div className={cn('prose-academic text-slate-800', msg.thinkingContent && 'mt-3')}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                      </div>
+                      <div className="flex mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <CopyButton content={msg.content} />
+                      </div>
                     </div>
                   )}
                 </motion.div>
@@ -309,12 +292,9 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   key="streaming"
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex gap-3 justify-start"
+                  className="w-full"
                 >
-                  <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center animate-pulse-slow">
-                    <BookOpen className="h-4 w-4 text-indigo-600" />
-                  </div>
-                  <div className="max-w-2xl rounded-2xl rounded-tl-sm bg-white border border-slate-200 shadow-sm px-4 py-3 text-sm flex-1">
+                  <div className="w-full text-sm">
                     {/* Thinking panel: shows steps 1 & 2 content during thinking_extended */}
                     {(isThinking || streamingThinking) && (
                       <ThinkingPanel content={streamingThinking} isStreaming={isThinking} />
@@ -337,7 +317,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                     )}
 
                     {streamingContent ? (
-                      <div className={cn('prose-academic', (isThinking || streamingThinking) && 'mt-3')}>
+                      <div className={cn('prose-academic text-slate-800', (isThinking || streamingThinking) && 'mt-3')}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
                         <span className="typing-cursor" />
                       </div>
