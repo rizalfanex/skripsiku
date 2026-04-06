@@ -237,26 +237,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastThinkingDurationRef = useRef<number>(0);
 
-  // Start timer when AI starts thinking (isThinking becomes true)
-  useEffect(() => {
-    if (isThinking) {
-      thinkingStartRef.current = Date.now();
-      setThinkingElapsedMs(0);
-      timerRef.current = setInterval(() => {
-        setThinkingElapsedMs(Date.now() - (thinkingStartRef.current ?? Date.now()));
-      }, 100);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-      // Capture final duration when thinking ends
-      if (thinkingStartRef.current) {
-        const dur = Date.now() - thinkingStartRef.current;
-        setThinkingElapsedMs(dur);
-        lastThinkingDurationRef.current = dur;
-      }
-    }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isThinking]);
-
   const handleConversationId = useCallback((id: string) => {
     onConversationCreated?.(id);
     // Stream is already complete when this fires, so navigation is safe.
@@ -284,6 +264,25 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
+
+  // Start timer when AI starts thinking (isThinking becomes true)
+  useEffect(() => {
+    if (isThinking) {
+      thinkingStartRef.current = Date.now();
+      setThinkingElapsedMs(0);
+      timerRef.current = setInterval(() => {
+        setThinkingElapsedMs(Date.now() - (thinkingStartRef.current ?? Date.now()));
+      }, 100);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (thinkingStartRef.current) {
+        const dur = Date.now() - thinkingStartRef.current;
+        setThinkingElapsedMs(dur);
+        lastThinkingDurationRef.current = dur;
+      }
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [isThinking]);
 
   const handleSend = async () => {
     const text = input.trim();
