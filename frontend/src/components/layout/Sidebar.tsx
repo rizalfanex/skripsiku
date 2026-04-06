@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  BookOpen, FolderOpen, Settings,
+  FolderOpen, Settings,
   ChevronLeft, ChevronRight, Plus, MessageSquare, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -68,8 +69,8 @@ export function Sidebar() {
       >
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-4">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary-500 shadow-lg shadow-primary-500/30">
-            <BookOpen className="h-4 w-4 text-white" />
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center">
+            <Image src="/logo.png" alt="Skripsiku" width={32} height={32} className="rounded-xl object-contain" />
           </div>
           {sidebarOpen && (
             <motion.span
