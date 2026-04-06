@@ -356,6 +356,13 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
     onError: (msg) => toast.error(msg),
   });
 
+  // Auto-scroll only while streaming (during AI response)
+  useEffect(() => {
+    if (streamingContent) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [streamingContent]);
+
   // Start timer when AI starts thinking (isThinking becomes true)
   useEffect(() => {
     if (isThinking) {
@@ -476,8 +483,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
                   className={cn(msg.role === 'user' ? 'flex justify-end' : 'w-full')}
                 >
                   {msg.role === 'user' ? (
