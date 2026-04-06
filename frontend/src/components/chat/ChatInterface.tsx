@@ -390,8 +390,8 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                 </div>
 
                 {/* Tagline */}
-                <p className="mt-10 text-[11px] text-slate-300 tracking-widest uppercase font-medium">
-                  Powered by Rizalfanex
+                <p className="mt-10 text-[11px] text-slate-300 tracking-widest uppercase font-medium letter-spacing-widest">
+                  Powered by <span className="text-indigo-300">Rizalfanex</span> &nbsp;·&nbsp; Designed for Academics
                 </p>
               </div>
             )}
@@ -496,10 +496,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
           {/* ── Input ── */}
           <div className="px-4 pb-5 pt-3 bg-slate-50">
-            {/* Disclaimer */}
-            <p className="text-center text-[11px] text-slate-400 mb-2">
-              Skripsiku may occasionally produce inaccurate responses. Always verify important information.
-            </p>
             {/* Pill container */}
             <div className={cn(
               'mx-auto w-full max-w-3xl rounded-3xl bg-white border border-slate-200 shadow-sm transition-shadow duration-200',
@@ -605,6 +601,10 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                 )}
               </div>
             </div>
+            {/* Disclaimer */}
+            <p className="text-center text-[11px] text-slate-400 mt-2.5">
+              Skripsiku may occasionally produce inaccurate responses. Always verify important information.
+            </p>
           </div>
         </div>
 
