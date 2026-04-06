@@ -47,6 +47,7 @@ export function Sidebar() {
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useAppStore();
   const { conversations, refresh, remove } = useConversations();
+  const streamingConversationId = useAppStore((s) => s.streamingConversationId);
 
   // Re-fetch from API on navigation to keep list in sync with server
   useEffect(() => { refresh(); }, [pathname, refresh]);
@@ -156,10 +157,10 @@ export function Sidebar() {
                             )}
                           >
                             <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-primary-500/70" />
-                            {conv.title === null ? (
+                            {conv.title === null && conv.id === streamingConversationId ? (
                               <span className="flex-1 h-3 rounded-md bg-slate-700/60 animate-pulse" />
                             ) : (
-                              <span className="truncate text-xs flex-1">{conv.title}</span>
+                              <span className="truncate text-xs flex-1">{conv.title ?? 'Chat Baru'}</span>
                             )}
                           </button>
                           <button

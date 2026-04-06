@@ -39,6 +39,10 @@ interface AppState {
   setSidebarConversations: (convs: Conversation[]) => void;
   upsertSidebarConversation: (conv: Partial<Conversation> & { id: string }) => void;
   removeSidebarConversation: (id: string) => void;
+
+  // ── Currently streaming conversation (for skeleton loader) ──
+  streamingConversationId: string | null;
+  setStreamingConversationId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -108,6 +112,10 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           sidebarConversations: state.sidebarConversations.filter((c) => c.id !== id),
         })),
+
+      // Streaming conversation tracker
+      streamingConversationId: null,
+      setStreamingConversationId: (streamingConversationId) => set({ streamingConversationId }),
     }),
     {
       name: 'skripsiku-store',

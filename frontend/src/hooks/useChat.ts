@@ -19,7 +19,7 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
   const {
     mode, language, citationStyle, documentType, taskType, setTaskType,
     activeProject, academicField,
-    triggerConversationRefresh, upsertSidebarConversation,
+    triggerConversationRefresh, upsertSidebarConversation, setStreamingConversationId,
   } = useAppStore();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -94,7 +94,7 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
             if (!currentConvIdRef.current) {
               currentConvIdRef.current = event.conversation_id;
               pendingConvIdRef.current = event.conversation_id;
-              // title: null → sidebar shows loading skeleton until title_update arrives
+              setStreamingConversationId(event.conversation_id);
               upsertSidebarConversation({
                 id: event.conversation_id,
                 title: null,
@@ -119,8 +119,8 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
           } else if (event.type === 'title_update') {
             if (event.title && event.conversation_id) {
               onTitleUpdate?.(event.title, event.conversation_id);
-              // Update the title in the sidebar list directly
               upsertSidebarConversation({ id: event.conversation_id, title: event.title });
+              setStreamingConversationId(null);
             }
           } else if (event.type === 'step_complete') {
             // continue
@@ -135,6 +135,7 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
             setStreamingThinking('');
             setIsThinking(false);
             setActiveStep(null);
+            setStreamingConversationId(null);
             if (pendingConvIdRef.current) {
               onConversationId?.(pendingConvIdRef.current);
               pendingConvIdRef.current = null;
@@ -158,7 +159,7 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
     [
       isLoading, messages, mode, language, citationStyle, documentType,
       taskType, activeProject, academicField, onConversationId, onTitleUpdate, onError,
-      upsertSidebarConversation,
+      upsertSidebarConversation, setStreamingConversationId,
     ]
   );
 
