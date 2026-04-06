@@ -40,7 +40,6 @@ function groupConversations(conversations: Conversation[]) {
 
 const NAV_ITEMS = [
   { href: '/projects', icon: FolderOpen, label: 'Proyek' },
-  { href: '/settings', icon: Settings, label: 'Pengaturan' },
 ];
 
 export function Sidebar() {
