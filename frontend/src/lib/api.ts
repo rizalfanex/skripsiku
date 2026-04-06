@@ -82,7 +82,7 @@ export const projectsApi = {
 export async function* streamChat(
   request: ChatRequest,
   signal?: AbortSignal
-): AsyncGenerator<{ type: string; content?: string; step?: string; model?: string; message?: string; conversation_id?: string }> {
+): AsyncGenerator<{ type: string; content?: string; step?: string; model?: string; message?: string; conversation_id?: string; title?: string }> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
   const response = await fetch(`${BASE}/api/v1/chat/stream`, {

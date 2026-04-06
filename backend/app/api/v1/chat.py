@@ -17,11 +17,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.auth import get_current_user
+from app.core.config import settings
 from app.core.database import get_db
 from app.models.conversation import Conversation, Message
 from app.models.project import Project
 from app.models.user import User
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.services.llm.nvidia import nvidia_provider
 from app.services.llm.orchestrator import orchestrator
 
 logger = logging.getLogger(__name__)
@@ -50,15 +52,47 @@ async def _resolve_user_from_request(request: Request, db: AsyncSession) -> Opti
 
 
 def _make_title(first_user_message: str) -> str:
-    """Derive a short display title from the first user message."""
+    """Fallback: derive a short display title by truncating the first user message."""
     clean = first_user_message.strip()
-    # Strip task-type prefix like "[Tulis Ulang]\n\n..."
     if clean.startswith("[") and "]\n" in clean:
         clean = clean.split("]\n", 1)[-1].strip()
     if len(clean) > 60:
         parts = clean[:57].rsplit(" ", 1)
         clean = (parts[0] if len(parts) > 1 else clean[:57]) + "..."
     return clean or "Chat Baru"
+
+
+async def _generate_ai_title(user_msg: str, assistant_msg: str) -> str:
+    """
+    Call the instruct model with a minimal prompt to get a 3-6 word
+    conversation title.  Falls back to simple truncation on any error.
+    """
+    clean_user = user_msg.strip()
+    if clean_user.startswith("[") and "]\n" in clean_user:
+        clean_user = clean_user.split("]\n", 1)[-1].strip()
+
+    prompt = (
+        "Buat judul percakapan singkat (3-6 kata) berdasarkan isi berikut.\n"
+        "Aturan keras: HANYA tulis judulnya. Tanpa tanda kutip. Tanpa titik. Tanpa penjelasan.\n\n"
+        f"Pesan pengguna: {clean_user[:400]}\n"
+        f"Respons AI: {assistant_msg[:300]}\n\n"
+        "Judul:"
+    )
+    try:
+        result = await nvidia_provider.complete(
+            model=settings.model_instant,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=20,
+            temperature=0.3,
+            stream=False,
+        )
+        title = result["content"].strip().strip('"').strip("'").strip()
+        if len(title) > 80:
+            title = title[:77] + "..."
+        return title if title else _make_title(user_msg)
+    except Exception as exc:
+        logger.warning("AI title generation failed, using fallback: %s", exc)
+        return _make_title(user_msg)
 
 
 @router.post("/stream")
@@ -148,10 +182,20 @@ async def chat_stream(
                         task_type=body.task_type,
                     )
                     db.add(assistant_msg)
+
+                    # Generate AI title for new conversations
                     if is_new_conversation and not conversation.title:
-                        conversation.title = _make_title(user_message_content)
+                        conversation.title = await _generate_ai_title(
+                            user_message_content, full_content
+                        )
+
                     conversation.updated_at = datetime.now(timezone.utc)
                     await db.commit()
+
+                    # Emit title so frontend can update sidebar without waiting for next refresh
+                    if is_new_conversation and conversation.title:
+                        yield f"data: {json.dumps({'type': 'title_update', 'title': conversation.title, 'conversation_id': conversation.id})}\n\n"
+
                 except Exception as exc:
                     logger.error("Failed to persist assistant message: %s", exc)
                     await db.rollback()

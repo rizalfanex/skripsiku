@@ -115,6 +115,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
   const [input, setInput] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [currentTitle, setCurrentTitle] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const handleConversationId = useCallback((id: string) => {
@@ -125,6 +126,10 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
     }
   }, [conversationId, onConversationCreated, router]);
 
+  const handleTitleUpdate = useCallback((title: string) => {
+    setCurrentTitle(title);
+  }, []);
+
   const {
     messages, isLoading, activeStep, streamingContent,
     streamingThinking, isThinking,
@@ -132,6 +137,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   } = useChat({
     conversationId,
     onConversationId: handleConversationId,
+    onTitleUpdate: handleTitleUpdate,
     onError: (msg) => toast.error(msg),
   });
 
@@ -172,7 +178,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <BookOpen className="h-4 w-4 text-primary-500 flex-shrink-0" />
           <span className="font-semibold text-white text-sm truncate">
-            {headerTitle ?? 'Skripsiku'}
+            {currentTitle ?? headerTitle ?? 'Skripsiku'}
           </span>
         </div>
 

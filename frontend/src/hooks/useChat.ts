@@ -10,10 +10,12 @@ interface UseChatOptions {
   conversationId?: string | null;
   /** Called when the backend assigns a new conversation_id (first message). */
   onConversationId?: (id: string) => void;
+  /** Called when the backend emits an AI-generated title for the conversation. */
+  onTitleUpdate?: (title: string, conversationId: string) => void;
   onError?: (msg: string) => void;
 }
 
-export function useChat({ conversationId, onConversationId, onError }: UseChatOptions = {}) {
+export function useChat({ conversationId, onConversationId, onTitleUpdate, onError }: UseChatOptions = {}) {
   const {
     mode, language, citationStyle, documentType, taskType, setTaskType,
     activeProject, academicField,
@@ -104,6 +106,10 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
           } else if (event.type === 'chunk') {
             fullContent += event.content ?? '';
             setStreamingContent(fullContent);
+          } else if (event.type === 'title_update') {
+            if (event.title && event.conversation_id) {
+              onTitleUpdate?.(event.title, event.conversation_id);
+            }
           } else if (event.type === 'step_complete') {
             // continue
           } else if (event.type === 'complete') {
@@ -139,7 +145,7 @@ export function useChat({ conversationId, onConversationId, onError }: UseChatOp
     },
     [
       isLoading, messages, mode, language, citationStyle, documentType,
-      taskType, activeProject, academicField, onConversationId, onError,
+      taskType, activeProject, academicField, onConversationId, onTitleUpdate, onError,
     ]
   );
 
