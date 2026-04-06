@@ -320,10 +320,10 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   const {
     mode, language, citationStyle, documentType,
     setMode, setLanguage, setCitationStyle,
+    settingsPanelOpen, setSettingsPanelOpen,
   } = useAppStore();
 
   const [input, setInput] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
   const [currentTitle, setCurrentTitle] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -420,19 +420,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           </span>
         </div>
 
-        {/* User avatar — opens settings */}
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          title="Pengaturan"
-          className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all flex-shrink-0',
-            showSettings
-              ? 'bg-indigo-500 text-white shadow-md'
-              : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
-          )}
-        >
-          R
-        </button>
+
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -670,7 +658,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
         {/* ── Settings Drawer (slide-in from right, overlay) ── */}
         <AnimatePresence>
-          {showSettings && (
+          {settingsPanelOpen && (
             <>
               {/* Backdrop */}
               <motion.div
@@ -680,7 +668,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18 }}
                 className="fixed inset-0 z-40 bg-black/10"
-                onClick={() => setShowSettings(false)}
+                onClick={() => setSettingsPanelOpen(false)}
               />
               {/* Panel */}
               <motion.div
@@ -703,7 +691,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                     </div>
                   </div>
                   <button
-                    onClick={() => setShowSettings(false)}
+                    onClick={() => setSettingsPanelOpen(false)}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
                   >
                     <X className="h-4 w-4" />

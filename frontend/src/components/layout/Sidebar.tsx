@@ -46,7 +46,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, setSidebarOpen } = useAppStore();
+  const { sidebarOpen, setSidebarOpen, settingsPanelOpen, setSettingsPanelOpen } = useAppStore();
   const { conversations, refresh, remove } = useConversations();
 
   // Re-fetch from API on navigation to keep list in sync with server
@@ -202,23 +202,23 @@ export function Sidebar() {
           </div>
         </nav>
 
-        {/* User footer */}
+        {/* Settings footer */}
         <div className="border-t border-slate-200 p-3">
-          {sidebarOpen ? (
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600">
-                ✦
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="truncate text-xs font-medium text-slate-700">Pengguna Lokal</p>
-                <p className="truncate text-xs text-slate-400">Mode Lokal</p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex w-full items-center justify-center rounded-lg py-2 text-slate-500">
-              <span className="text-sm">✦</span>
-            </div>
-          )}
+          <button
+            onClick={() => setSettingsPanelOpen(!settingsPanelOpen)}
+            title="Pengaturan"
+            className={cn(
+              'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all',
+              settingsPanelOpen
+                ? 'bg-indigo-50 text-indigo-600'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+            )}
+          >
+            <Settings className={cn('h-4 w-4 flex-shrink-0', settingsPanelOpen ? 'text-indigo-500' : 'text-slate-400')} />
+            {sidebarOpen && (
+              <span className="text-xs font-medium">Pengaturan</span>
+            )}
+          </button>
         </div>
       </motion.aside>
     </AnimatePresence>
