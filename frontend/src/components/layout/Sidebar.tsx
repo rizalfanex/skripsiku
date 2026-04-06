@@ -72,16 +72,7 @@ export function Sidebar() {
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center">
             <Image src="/logo.png" alt="Skripsiku" width={32} height={32} className="rounded-xl object-contain" />
           </div>
-          {sidebarOpen && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-base font-bold text-slate-900"
-            >
-              Skripsiku
-            </motion.span>
-          )}
+          
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="ml-auto flex-shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
