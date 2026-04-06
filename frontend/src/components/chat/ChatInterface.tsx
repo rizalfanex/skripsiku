@@ -353,28 +353,46 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
             {/* Empty state */}
             {historyLoaded && messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-6">
-                  <BookOpen className="h-8 w-8 text-indigo-500" />
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12 select-none">
+                {/* Logo mark */}
+                <div className="relative mb-8">
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-50 to-slate-100 border border-slate-200 shadow-sm flex items-center justify-center">
+                    <BookOpen className="h-9 w-9 text-indigo-400" strokeWidth={1.5} />
+                  </div>
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[8px] font-bold text-white shadow">AI</span>
                 </div>
-                <h2 className="text-xl font-bold text-slate-900 mb-3">Halo! Saya Skripsiku</h2>
-                <p className="text-slate-500 text-sm max-w-md leading-relaxed mb-8">
-                  Asisten AI akademik Anda. Ketik pertanyaan, paste teks, atau pilih satu tool di bawah.
+
+                {/* Headline */}
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-2">
+                  Selamat datang di <span className="text-indigo-500">Skripsiku</span>
+                </h2>
+                <p className="text-sm text-slate-400 max-w-sm leading-relaxed mb-10">
+                  Asisten akademik AI untuk mahasiswa. Tulis, analisis, perbaiki, dan sempurnakan karya ilmiah Anda.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-xl">
-                  {QUICK_ACTIONS.slice(0, 6).map((action) => (
+
+                {/* Suggestion chips */}
+                <div className="flex flex-col gap-2 w-full max-w-md">
+                  {[
+                    { icon: '✍️', text: 'Tulis ulang paragraf saya agar lebih akademis' },
+                    { icon: '🔍', text: 'Analisis celah penelitian dari tinjauan pustaka saya' },
+                    { icon: '📝', text: 'Buat abstrak jurnal dari bab hasil & pembahasan saya' },
+                  ].map((s) => (
                     <button
-                      key={action.taskType}
-                      onClick={() =>
-                        setInput(`Paste teks Anda di sini untuk ${TASK_TYPE_LABELS[action.taskType].id.toLowerCase()}...`)
-                      }
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-500 hover:text-slate-700 hover:border-indigo-200 transition-all text-left shadow-sm"
+                      key={s.text}
+                      onClick={() => setInput(s.text)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-slate-800 transition-all text-left shadow-sm group"
                     >
-                      <span>{action.icon}</span>
-                      <span>{action.label}</span>
+                      <span className="text-base flex-shrink-0">{s.icon}</span>
+                      <span className="flex-1 leading-snug">{s.text}</span>
+                      <Send className="h-3.5 w-3.5 text-slate-300 group-hover:text-indigo-400 flex-shrink-0 transition-colors" />
                     </button>
                   ))}
                 </div>
+
+                {/* Tagline */}
+                <p className="mt-10 text-[11px] text-slate-300 tracking-widest uppercase font-medium">
+                  Powered by Advanced AI · Designed for Academics
+                </p>
               </div>
             )}
 
