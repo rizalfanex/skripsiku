@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
-  Zap, Brain, Star, RotateCcw, Copy, Check, MessageSquarePlus, ChevronDown,
+  Zap, Brain, Star, RotateCcw, Copy, Check, MessageSquarePlus, ChevronDown, X,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -41,36 +41,106 @@ const QUICK_ACTIONS: { taskType: TaskType; label: string; icon: string; mode: Ai
 ];
 
 // ── Thinking Panel ──────────────────────────────────────────────────────────
-function ThinkingPanel({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
-  const [open, setOpen] = useState(isStreaming ?? false);
-  // Auto-open while streaming, keep whatever state after done
-  useEffect(() => {
-    if (isStreaming) setOpen(true);
-  }, [isStreaming]);
+// ── Thinking Drawer (slide-in side panel) ───────────────────────────────────
+interface ThinkingDrawerProps {
+  content: string;
+  isStreaming?: boolean;
+  open: boolean;
+  onClose: () => void;
+  durationMs: number;
+}
+
+function ThinkingDrawer({ content, isStreaming, open, onClose, durationMs }: ThinkingDrawerProps) {
+  const fmt = (ms: number) => {
+    if (ms < 1000) return `${ms}ms`;
+    return `${(ms / 1000).toFixed(1)}s`;
+  };
 
   return (
-    <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-slate-500 hover:text-slate-700 transition-colors"
-      >
-        <Brain className="h-3 w-3 text-primary-400 flex-shrink-0" />
-        <span className="flex-1 text-left">
-          {isStreaming ? 'Sedang berpikir...' : 'Lihat proses berpikir'}
-        </span>
-        {isStreaming && <ThinkingDots />}
-        <ChevronDown
-          className={cn('h-3 w-3 ml-1 transition-transform duration-200', open && 'rotate-180')}
-        />
-      </button>
+    <AnimatePresence>
       {open && (
-        <div className="px-3 pb-3 text-xs text-slate-500 max-h-64 overflow-y-auto scrollbar-hide border-t border-slate-200 pt-2">
-          <div className="prose-academic opacity-80">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS as any}>{content}</ReactMarkdown>
-          </div>
-        </div>
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px]"
+            onClick={onClose}
+          />
+          {/* Panel */}
+          <motion.div
+            key="panel"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white border-l border-slate-200 flex flex-col shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
+              <div className="flex items-center gap-2 flex-1">
+                <Brain className="h-4 w-4 text-indigo-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {isStreaming ? 'Sedang berpikir...' : 'Proses berpikir'}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 font-mono">
+                    {isStreaming
+                      ? <><span className="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-pulse mr-1" />{fmt(durationMs)}</>
+                      : durationMs > 0 ? `Selesai dalam ${fmt(durationMs)}` : 'Selesai'
+                    }
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 text-xs text-slate-600 leading-relaxed scrollbar-hide">
+              {content ? (
+                <div className="prose-academic opacity-90">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS as any}>{content}</ReactMarkdown>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-slate-400 mt-4">
+                  <ThinkingDots />
+                  <span>Menunggu konten berpikir...</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </>
       )}
-    </div>
+    </AnimatePresence>
+  );
+}
+
+// ── Thinking Chip (inline trigger) ──────────────────────────────────────────
+function ThinkingChip({ isStreaming, onClick }: { isStreaming?: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all mb-2',
+        isStreaming
+          ? 'bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100'
+          : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+      )}
+    >
+      <Brain className="h-3 w-3 flex-shrink-0" />
+      {isStreaming ? (
+        <><ThinkingDots /><span className="ml-0.5">Berpikir...</span></>
+      ) : (
+        <span>Lihat proses berpikir</span>
+      )}
+    </button>
   );
 }
 
@@ -156,6 +226,36 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   const [showSettings, setShowSettings] = useState(false);
   const [currentTitle, setCurrentTitle] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // ── Thinking drawer state ──────────────────────────────────────────────────
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Content shown in drawer: null = streaming thinking, index = past message
+  const [drawerContent, setDrawerContent] = useState<{ content: string; durationMs: number } | null>(null);
+  // Real-time timer while streaming
+  const thinkingStartRef = useRef<number | null>(null);
+  const [thinkingElapsedMs, setThinkingElapsedMs] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastThinkingDurationRef = useRef<number>(0);
+
+  // Start timer when AI starts thinking (isThinking becomes true)
+  useEffect(() => {
+    if (isThinking) {
+      thinkingStartRef.current = Date.now();
+      setThinkingElapsedMs(0);
+      timerRef.current = setInterval(() => {
+        setThinkingElapsedMs(Date.now() - (thinkingStartRef.current ?? Date.now()));
+      }, 100);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+      // Capture final duration when thinking ends
+      if (thinkingStartRef.current) {
+        const dur = Date.now() - thinkingStartRef.current;
+        setThinkingElapsedMs(dur);
+        lastThinkingDurationRef.current = dur;
+      }
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [isThinking]);
 
   const handleConversationId = useCallback((id: string) => {
     onConversationCreated?.(id);
@@ -312,7 +412,12 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   ) : (
                     <div className="w-full text-sm relative group">
                       {msg.thinkingContent && (
-                        <ThinkingPanel content={msg.thinkingContent} />
+                        <ThinkingChip
+                          onClick={() => {
+                            setDrawerContent({ content: msg.thinkingContent!, durationMs: lastThinkingDurationRef.current });
+                            setDrawerOpen(true);
+                          }}
+                        />
                       )}
                       <div className={cn('prose-academic text-slate-800', msg.thinkingContent && 'mt-3')}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS as any}>{msg.content}</ReactMarkdown>
@@ -334,9 +439,15 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   className="w-full"
                 >
                   <div className="w-full text-sm">
-                    {/* Thinking panel: shows steps 1 & 2 content during thinking_extended */}
+                    {/* Thinking chip: opens drawer with live content */}
                     {(isThinking || streamingThinking) && (
-                      <ThinkingPanel content={streamingThinking} isStreaming={isThinking} />
+                      <ThinkingChip
+                        isStreaming={isThinking}
+                        onClick={() => {
+                          setDrawerContent(null); // null = use live streaming content
+                          setDrawerOpen(true);
+                        }}
+                      />
                     )}
 
                     {/* Active step label when NOT in thinking phase (step 3 / final revision) */}
@@ -651,6 +762,15 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── Thinking Drawer (global, portal-like) ── */}
+      <ThinkingDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        content={drawerContent ? drawerContent.content : streamingThinking}
+        isStreaming={drawerContent === null && isThinking}
+        durationMs={drawerContent ? drawerContent.durationMs : thinkingElapsedMs}
+      />
     </div>
   );
 }
