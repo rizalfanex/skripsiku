@@ -142,10 +142,10 @@ export default function ProjectsPage() {
                     <button
                       onClick={() => {
                         setActiveProject(project);
-                        router.push(`/workspace/${project.id}`);
+                        router.push(`/projects/${project.id}`);
                       }}
                       className="p-1.5 rounded-lg text-slate-500 hover:text-primary-400 hover:bg-primary-500/10 transition"
-                      title="Buka workspace"
+                      title="Buka proyek"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </button>
@@ -163,7 +163,7 @@ export default function ProjectsPage() {
                   className="font-semibold text-white text-sm mb-2 line-clamp-2 cursor-pointer hover:text-primary-300 transition-colors"
                   onClick={() => {
                     setActiveProject(project);
-                    router.push(`/workspace/${project.id}`);
+                    router.push(`/projects/${project.id}`);
                   }}
                 >
                   {project.title}
