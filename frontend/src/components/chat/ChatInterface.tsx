@@ -356,11 +356,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
     onError: (msg) => toast.error(msg),
   });
 
-  // Auto-scroll
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingContent]);
-
   // Start timer when AI starts thinking (isThinking becomes true)
   useEffect(() => {
     if (isThinking) {
