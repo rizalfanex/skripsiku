@@ -92,7 +92,7 @@ export function Sidebar() {
         {/* Chat Baru CTA */}
         <div className="p-3">
           <button
-            onClick={() => router.push('/chat')}
+            onClick={() => router.push(`/chat?n=${Date.now()}`)}
             className={cn(
               'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200',
               'bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 border border-primary-500/20'

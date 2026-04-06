@@ -198,7 +198,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
         {/* New chat */}
         <button
-          onClick={() => router.push('/chat')}
+          onClick={() => router.push(`/chat?n=${Date.now()}`)}
           className="btn-ghost text-xs px-3 py-2"
           title="Chat Baru"
         >
