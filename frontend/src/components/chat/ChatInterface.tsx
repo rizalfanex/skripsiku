@@ -66,7 +66,7 @@ function ThinkingPanel({ content, isStreaming }: { content: string; isStreaming?
       {open && (
         <div className="px-3 pb-3 text-xs text-slate-500 max-h-64 overflow-y-auto scrollbar-hide border-t border-slate-200 pt-2">
           <div className="prose-academic opacity-80">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS as any}>{content}</ReactMarkdown>
           </div>
         </div>
       )}
@@ -90,6 +90,51 @@ function CopyButton({ content }: { content: string }) {
     </button>
   );
 }
+
+function CodeBlock({ className, children }: { className?: string; children?: React.ReactNode }) {
+  const [copied, setCopied] = useState(false);
+  const lang = className?.replace('language-', '') ?? '';
+  const code = String(children ?? '').trimEnd();
+
+  return (
+    <div className="relative my-3 rounded-xl overflow-hidden border border-slate-200 bg-slate-900 text-sm">
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+        <span className="text-xs text-slate-400 font-mono">{lang || 'code'}</span>
+        <button
+          onClick={async () => {
+            await navigator.clipboard.writeText(code);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }}
+          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
+        >
+          {copied
+            ? <><Check className="h-3.5 w-3.5 text-emerald-400" /><span className="text-emerald-400">Tersalin!</span></>
+            : <><Copy className="h-3.5 w-3.5" /><span>Salin kode</span></>}
+        </button>
+      </div>
+      {/* Code content */}
+      <pre className="overflow-x-auto px-4 py-3 text-slate-100 font-mono text-xs leading-relaxed scrollbar-hide">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
+
+const MD_COMPONENTS = {
+  code({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'> & { inline?: boolean }) {
+    const isInline = !className;
+    if (isInline) {
+      return (
+        <code className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-800 font-mono text-[0.85em]" {...props}>
+          {children}
+        </code>
+      );
+    }
+    return <CodeBlock className={className}>{children}</CodeBlock>;
+  },
+};
 
 interface ChatInterfaceProps {
   /** ID of an existing conversation to load & continue. Null = new conversation. */
@@ -270,7 +315,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                         <ThinkingPanel content={msg.thinkingContent} />
                       )}
                       <div className={cn('prose-academic text-slate-800', msg.thinkingContent && 'mt-3')}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS as any}>{msg.content}</ReactMarkdown>
                       </div>
                       <div className="flex mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <CopyButton content={msg.content} />
@@ -322,7 +367,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                             </div>
                           </div>
                         )}
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS as any}>{streamingContent}</ReactMarkdown>
                         <span className="typing-cursor" />
                       </div>
                     ) : !isThinking && !streamingThinking ? (
