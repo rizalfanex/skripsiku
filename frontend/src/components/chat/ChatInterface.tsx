@@ -479,9 +479,9 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
               <EmptyState />
             )}
 
-            <AnimatePresence mode="popLayout">
+            <div className="space-y-6">
               {messages.map((msg, i) => (
-                <motion.div
+                <div
                   key={i}
                   className={cn(msg.role === 'user' ? 'flex justify-end' : 'w-full')}
                 >
@@ -507,17 +507,12 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                       </div>
                     </div>
                   )}
-                </motion.div>
+                </div>
               ))}
 
               {/* Streaming */}
               {isLoading && (
-                <motion.div
-                  key="streaming"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="w-full"
-                >
+                <div className="w-full">
                   <div className="w-full text-sm">
                     {/* Thinking chip: opens drawer with live content */}
                     {(isThinking || streamingThinking) && (
@@ -568,9 +563,9 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                       </div>
                     ) : null}
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            </div>
 
             <div ref={chatEndRef} />
           </div>
