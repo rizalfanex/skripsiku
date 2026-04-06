@@ -50,10 +50,8 @@ class Settings(BaseSettings):
     model_thinking_extended: str = "moonshotai/kimi-k2-thinking"
 
     # ── LLM Defaults ─────────────────────────────────────────
-    # All three modes share the same token budget.
-    # What differs is the ALGORITHM (prompt strategy / pipeline steps), not the limit.
     llm_max_tokens_instant: int = 4096
-    llm_max_tokens_thinking: int = 4096
+    llm_max_tokens_thinking: int = 8192
     llm_max_tokens_extended: int = 4096
 
     llm_temperature_instant: float = 0.7    # creative, fast

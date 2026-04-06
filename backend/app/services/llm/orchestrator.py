@@ -87,8 +87,11 @@ def _model_for_mode(mode: AiMode, step: str = "main") -> str:
 
 
 def _max_tokens(mode: AiMode) -> int:
-    # All modes share the same token budget — differentiation is algorithmic, not by limit.
-    return settings.llm_max_tokens_instant  # all equal (4096 by default)
+    return {
+        "instant": settings.llm_max_tokens_instant,
+        "thinking_standard": settings.llm_max_tokens_thinking,
+        "thinking_extended": settings.llm_max_tokens_extended,
+    }[mode]
 
 
 def _temperature(mode: AiMode) -> float:
@@ -245,7 +248,8 @@ class AcademicOrchestrator:
         instruct_model = settings.model_instant
         thinking_model = settings.model_thinking_extended
         system_prompt = self.builder.build_system_prompt(**ctx, mode="thinking_extended")
-        step_tokens = settings.llm_max_tokens_extended  # same budget per step
+        step_tokens = settings.llm_max_tokens_extended  # per-step budget for drafting/critique
+        final_tokens = settings.llm_max_tokens_thinking  # larger budget for the visible final answer
 
         # ── Step 1: Draft (thinking process — hidden by default on frontend) ───
         yield _sse({"type": "thinking_start", "step": "initial_draft"})
@@ -318,7 +322,7 @@ class AcademicOrchestrator:
         final_stream = await nvidia_provider.complete(
             model=instruct_model,
             messages=revision_messages,
-            max_tokens=step_tokens,
+            max_tokens=final_tokens,
             temperature=settings.llm_temperature_extended,
             stream=True,
         )

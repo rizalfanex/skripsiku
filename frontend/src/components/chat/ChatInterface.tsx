@@ -312,8 +312,19 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
                     {streamingContent ? (
                       <div className={cn('prose-academic text-slate-800', (isThinking || streamingThinking) && 'mt-3')}>
+                        {activeStep && activeStep !== 'main' && (
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-[10px] text-indigo-500 font-medium">
+                              <span className="w-1 h-1 rounded-full bg-indigo-400 animate-pulse inline-block" />
+                              {activeStep === 'deep_analysis' ? 'Mode Analitik' :
+                               activeStep === 'final_revision' ? 'Menyempurnakan...' :
+                               'Thinking'}
+                            </div>
+                          </div>
+                        )}
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
                         <span className="typing-cursor" />
+                      </div>
                       </div>
                     ) : !isThinking && !streamingThinking ? (
                       <div className="flex items-center gap-2 text-slate-400">
