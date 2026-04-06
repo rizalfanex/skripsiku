@@ -103,72 +103,10 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Conversation history + nav */}
+        {/* Nav + Conversation history */}
         <nav className="flex-1 overflow-y-auto px-3 py-2 scrollbar-hide">
-          {/* Conversation list */}
-          {sidebarOpen && conversations.length > 0 && (
-            <div className="mb-4">
-              {groups.map((group) => (
-                <div key={group.label} className="mb-3">
-                  <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
-                    {group.label}
-                  </p>
-                  <ul className="space-y-0.5">
-                    {group.items.map((conv) => (
-                      <li key={conv.id} className="group/item relative">
-                        <button
-                          onClick={() => router.push(`/chat/${conv.id}`)}
-                          className={cn(
-                            'flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-all',
-                            activeConvId === conv.id
-                              ? 'bg-primary-500/15 text-slate-200 border border-primary-500/20'
-                              : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'
-                          )}
-                        >
-                          <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-primary-500/70" />
-                          <span className="truncate text-xs flex-1">
-                            {conv.title ?? 'Chat Baru'}
-                          </span>
-                        </button>
-                        {/* Delete on hover */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (activeConvId === conv.id) router.push('/chat');
-                            remove(conv.id);
-                          }}
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 hidden group-hover/item:flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 transition"
-                          title="Hapus chat"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* If collapsed, show conversation icons */}
-          {!sidebarOpen && conversations.slice(0, 8).map((conv) => (
-            <button
-              key={conv.id}
-              onClick={() => router.push(`/chat/${conv.id}`)}
-              title={conv.title ?? 'Chat Baru'}
-              className={cn(
-                'flex w-full items-center justify-center rounded-xl p-2 mb-0.5 transition',
-                activeConvId === conv.id
-                  ? 'bg-primary-500/15 text-primary-300'
-                  : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
-              )}
-            >
-              <MessageSquare className="h-4 w-4" />
-            </button>
-          ))}
-
-          {/* Secondary nav */}
-          <div className={cn('border-t border-primary-500/10 pt-2', sidebarOpen && conversations.length > 0 && 'mt-2')}>
+          {/* Kelola section — always on top */}
+          <div className="mb-2">
             {sidebarOpen && (
               <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
                 Kelola
@@ -187,6 +125,81 @@ export function Sidebar() {
                 );
               })}
             </ul>
+          </div>
+
+          {/* History section — below Kelola */}
+          <div className="border-t border-primary-500/10 pt-2 mt-1">
+            {sidebarOpen && (
+              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+                Riwayat Chat
+              </p>
+            )}
+
+            {/* Expanded: grouped list */}
+            {sidebarOpen && conversations.length > 0 && (
+              <div>
+                {groups.map((group) => (
+                  <div key={group.label} className="mb-3">
+                    <p className="mb-1 px-2 text-[10px] font-medium text-slate-700">
+                      {group.label}
+                    </p>
+                    <ul className="space-y-0.5">
+                      {group.items.map((conv) => (
+                        <li key={conv.id} className="group/item relative">
+                          <button
+                            onClick={() => router.push(`/chat/${conv.id}`)}
+                            className={cn(
+                              'flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-all',
+                              activeConvId === conv.id
+                                ? 'bg-primary-500/15 text-slate-200 border border-primary-500/20'
+                                : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'
+                            )}
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-primary-500/70" />
+                            <span className="truncate text-xs flex-1">
+                              {conv.title ?? 'Chat Baru'}
+                            </span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (activeConvId === conv.id) router.push('/chat');
+                              remove(conv.id);
+                            }}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 hidden group-hover/item:flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                            title="Hapus chat"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Expanded: empty state */}
+            {sidebarOpen && conversations.length === 0 && (
+              <p className="px-2 py-3 text-xs text-slate-600">Belum ada riwayat chat.</p>
+            )}
+
+            {/* Collapsed: conversation icons */}
+            {!sidebarOpen && conversations.slice(0, 8).map((conv) => (
+              <button
+                key={conv.id}
+                onClick={() => router.push(`/chat/${conv.id}`)}
+                title={conv.title ?? 'Chat Baru'}
+                className={cn(
+                  'flex w-full items-center justify-center rounded-xl p-2 mb-0.5 transition',
+                  activeConvId === conv.id
+                    ? 'bg-primary-500/15 text-primary-300'
+                    : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                )}
+              >
+                <MessageSquare className="h-4 w-4" />
+              </button>
+            ))}
           </div>
         </nav>
 
