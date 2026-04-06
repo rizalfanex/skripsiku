@@ -54,13 +54,6 @@ export interface User {
   created_at: string;
 }
 
-export interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  user: User;
-}
-
 // ── Project ───────────────────────────────────────────────────────────────────
 export interface Project {
   id: string;

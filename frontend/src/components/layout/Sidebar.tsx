@@ -45,7 +45,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, sidebarOpen, setSidebarOpen } = useAppStore();
+  const { sidebarOpen, setSidebarOpen } = useAppStore();
   const { conversations, refresh, remove } = useConversations();
 
   // Refresh conversation list on any navigation
@@ -195,11 +195,11 @@ export function Sidebar() {
           {sidebarOpen ? (
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-500/20 text-sm font-semibold text-primary-300">
-                {user?.full_name?.[0]?.toUpperCase() ?? '✦'}
+                ✦
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-xs font-medium text-slate-300">{user?.full_name ?? 'Mode Tamu'}</p>
-                <p className="truncate text-xs text-slate-500">{user?.email ?? 'Tidak perlu akun'}</p>
+                <p className="truncate text-xs font-medium text-slate-300">Pengguna Lokal</p>
+                <p className="truncate text-xs text-slate-500">Mode Lokal</p>
               </div>
             </div>
           ) : (

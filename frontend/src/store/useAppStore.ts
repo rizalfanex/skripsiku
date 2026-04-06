@@ -2,16 +2,10 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   AiMode, CitationStyle, DocumentType, Language, Project,
-  TaskType, User,
+  TaskType,
 } from '@/lib/types';
 
 interface AppState {
-  // ── Auth ──────────────────────────────────────────────────
-  user: User | null;
-  isAuthenticated: boolean;
-  setUser: (user: User | null) => void;
-  logout: () => void;
-
   // ── Active project (for project-scoped workspace) ─────────
   activeProject: Project | null;
   setActiveProject: (project: Project | null) => void;
@@ -40,18 +34,6 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      // Auth
-      user: null,
-      isAuthenticated: false,
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
-      logout: () => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-        }
-        set({ user: null, isAuthenticated: false, activeProject: null });
-      },
-
       // Project
       activeProject: null,
       setActiveProject: (project) =>
@@ -93,8 +75,6 @@ export const useAppStore = create<AppState>()(
         typeof window !== 'undefined' ? localStorage : { getItem: () => null, setItem: () => {}, removeItem: () => {} }
       ),
       partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
         mode: state.mode,
         language: state.language,
         citationStyle: state.citationStyle,

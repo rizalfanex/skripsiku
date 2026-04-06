@@ -72,7 +72,6 @@ export default function WorkspacePage() {
   const projectId = params.projectId as string;
 
   const {
-    user,
     mode, language, citationStyle, documentType,
     setMode, setLanguage, setCitationStyle,
     setActiveProject,
@@ -270,7 +269,7 @@ export default function WorkspacePage() {
                   </div>
                   {msg.role === 'user' && (
                     <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-300">
-                      {user?.full_name?.[0]?.toUpperCase() ?? 'U'}
+                      U
                     </div>
                   )}
                 </motion.div>

@@ -8,7 +8,6 @@ import {
   Plus, FolderOpen, BookOpen, FileText, Zap, Brain, Star,
   ArrowRight, Clock, Sparkles,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
 import { useProject } from '@/hooks/useProject';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -51,12 +50,11 @@ const MODE_ICONS: Record<AiMode, React.ComponentType<{ className?: string }>> = 
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user } = useAppStore();
   const { projects, loadProjects, setActiveProject, isLoading } = useProject();
 
   useEffect(() => { loadProjects(); }, [loadProjects]);
 
-  const firstName = user?.full_name?.split(' ')[0] ?? 'Pengguna';
+  const firstName = 'Pengguna';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Selamat pagi' : hour < 17 ? 'Selamat siang' : 'Selamat malam';
 

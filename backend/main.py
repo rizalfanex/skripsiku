@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import init_db, get_db
 
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
@@ -45,6 +45,11 @@ app.include_router(api_router)
 async def startup() -> None:
     logger.info("Initialising database…")
     await init_db()
+    # Create the single local user (no-auth mode)
+    from app.api.v1.auth import ensure_local_user  # noqa: PLC0415
+    async for db in get_db():
+        await ensure_local_user(db)
+        break
     logger.info("Skripsiku backend ready on port %d", settings.backend_port)
 
 
