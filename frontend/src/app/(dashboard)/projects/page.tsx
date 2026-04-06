@@ -10,66 +10,34 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
-import { DOCUMENT_TYPE_LABELS, AI_MODE_LABELS, CITATION_STYLE_LABELS, LANGUAGE_LABELS, formatRelativeDate } from '@/lib/utils';
-import { DocumentType, AiMode, Language, CitationStyle, ProjectCreate } from '@/lib/types';
-
-const DOC_TYPES: { value: DocumentType; label: string }[] = [
-  { value: 'thesis', label: 'Skripsi / Tesis / Disertasi' },
-  { value: 'journal_article', label: 'Artikel Jurnal' },
-  { value: 'conference_paper', label: 'Makalah Konferensi' },
-  { value: 'abstract', label: 'Abstrak' },
-  { value: 'literature_review', label: 'Tinjauan Pustaka' },
-  { value: 'methodology', label: 'Metodologi' },
-  { value: 'other', label: 'Lainnya' },
-];
-
-const INIT_FORM: ProjectCreate = {
-  title: '',
-  description: '',
-  document_type: 'thesis',
-  academic_field: '',
-  academic_level: 'undergraduate',
-  language: 'id',
-  citation_style: 'apa',
-  ai_mode: 'instant',
-};
+import { DOCUMENT_TYPE_LABELS, formatRelativeDate } from '@/lib/utils';
+import { DocumentType, ProjectCreate } from '@/lib/types';
 
 export default function ProjectsPage() {
   const router = useRouter();
   const { projects, isLoading, loadProjects, createProject, deleteProject, setActiveProject } = useProject();
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState<ProjectCreate>({ ...INIT_FORM });
+  const [title, setTitle] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => { loadProjects(); }, [loadProjects]);
 
-  // Read ?type= from URL client-side to avoid useSearchParams prerender error
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const type = params.get('type') as DocumentType;
-    if (type) setForm((prev) => ({ ...prev, document_type: type }));
-  }, []);
-
   const filtered = projects.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase()) ||
-    p.academic_field.toLowerCase().includes(search.toLowerCase())
+    p.title.toLowerCase().includes(search.toLowerCase())
   );
-
-  const update = (field: string, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim()) return;
+    if (!title.trim()) return;
     setIsCreating(true);
-    const project = await createProject(form);
+    const project = await createProject({ title: title.trim() } as ProjectCreate);
     setIsCreating(false);
     if (project) {
       setShowModal(false);
-      setForm(INIT_FORM);
-      router.push(`/workspace/${project.id}`);
+      setTitle('');
+      router.push(`/projects/${project.id}`);
     }
   };
 
@@ -195,84 +163,21 @@ export default function ProjectsPage() {
       )}
 
       {/* Create Project Modal */}
-      <Modal open={showModal} onClose={() => setShowModal(false)} title="Buat Proyek Baru" size="lg">
-        <form onSubmit={handleCreate} className="space-y-4">
+      <Modal open={showModal} onClose={() => { setShowModal(false); setTitle(''); }} title="Proyek Baru" size="sm">
+        <form onSubmit={handleCreate}>
           <Input
             id="proj-title"
-            label="Judul Proyek *"
-            placeholder="Contoh: Pengaruh Media Sosial terhadap Prestasi Akademik Mahasiswa"
-            value={form.title}
-            onChange={(e) => update('title', e.target.value)}
+            label="Nama Proyek"
+            placeholder="Contoh: Skripsi Psikologi, Jurnal Informatika..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
+            autoFocus
           />
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-slate-300">Deskripsi (opsional)</label>
-            <textarea
-              placeholder="Deskripsi singkat tentang proyek ini..."
-              value={form.description}
-              onChange={(e) => update('description', e.target.value)}
-              className="input-field resize-none h-20"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-300">Jenis Dokumen</label>
-              <select value={form.document_type} onChange={(e) => update('document_type', e.target.value)} className="input-field">
-                {DOC_TYPES.map((d) => (
-                  <option key={d.value} value={d.value} className="bg-navy-800">{d.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-300">Tingkat Akademik</label>
-              <select value={form.academic_level} onChange={(e) => update('academic_level', e.target.value)} className="input-field">
-                <option value="undergraduate" className="bg-navy-800">S1 / Sarjana</option>
-                <option value="postgraduate" className="bg-navy-800">S2 / S3</option>
-                <option value="researcher" className="bg-navy-800">Peneliti / Dosen</option>
-              </select>
-            </div>
-          </div>
-
-          <Input
-            label="Bidang Studi / Disiplin Ilmu"
-            placeholder="Contoh: Psikologi Pendidikan, Teknik Informatika, Manajemen..."
-            value={form.academic_field}
-            onChange={(e) => update('academic_field', e.target.value)}
-          />
-
-          <div className="grid grid-cols-3 gap-x-4 gap-y-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-300">Bahasa Output</label>
-              <select value={form.language} onChange={(e) => update('language', e.target.value)} className="input-field">
-                {(Object.entries(LANGUAGE_LABELS) as [Language, string][]).map(([v, l]) => (
-                  <option key={v} value={v} className="bg-navy-800">{l}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-300">Gaya Sitasi</label>
-              <select value={form.citation_style} onChange={(e) => update('citation_style', e.target.value)} className="input-field">
-                {(Object.entries(CITATION_STYLE_LABELS) as [CitationStyle, string][]).map(([v, l]) => (
-                  <option key={v} value={v} className="bg-navy-800">{l}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-slate-300">Mode AI</label>
-              <select value={form.ai_mode} onChange={(e) => update('ai_mode', e.target.value)} className="input-field">
-                {(Object.entries(AI_MODE_LABELS) as [AiMode, (typeof AI_MODE_LABELS)[AiMode]][]).map(([v, l]) => (
-                  <option key={v} value={v} className="bg-navy-800">{l.labelId}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setShowModal(false)} type="button">Batal</Button>
-            <Button type="submit" isLoading={isCreating}>
-              Buat Proyek <Plus className="h-4 w-4" />
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="ghost" onClick={() => { setShowModal(false); setTitle(''); }} type="button">Batal</Button>
+            <Button type="submit" isLoading={isCreating} disabled={!title.trim()}>
+              Buat <Plus className="h-4 w-4" />
             </Button>
           </div>
         </form>
