@@ -45,11 +45,11 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, setSidebarOpen } = useAppStore();
+  const { sidebarOpen, setSidebarOpen, conversationRefreshAt } = useAppStore();
   const { conversations, refresh, remove } = useConversations();
 
-  // Refresh conversation list on any navigation
-  useEffect(() => { refresh(); }, [pathname, refresh]);
+  // Refresh on navigation or whenever a new conversation is created
+  useEffect(() => { refresh(); }, [pathname, conversationRefreshAt, refresh]);
 
   const groups = useMemo(() => groupConversations(conversations), [conversations]);
 

@@ -29,6 +29,10 @@ interface AppState {
   settingsPanelOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   setSettingsPanelOpen: (open: boolean) => void;
+
+  // ── Conversation refresh trigger ───────────────────────────
+  conversationRefreshAt: number;
+  triggerConversationRefresh: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -68,6 +72,10 @@ export const useAppStore = create<AppState>()(
       settingsPanelOpen: false,
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
       setSettingsPanelOpen: (settingsPanelOpen) => set({ settingsPanelOpen }),
+
+      // Conversation refresh
+      conversationRefreshAt: 0,
+      triggerConversationRefresh: () => set({ conversationRefreshAt: Date.now() }),
     }),
     {
       name: 'skripsiku-store',
