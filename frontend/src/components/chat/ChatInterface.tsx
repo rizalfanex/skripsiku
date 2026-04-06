@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
-  Zap, Brain, Star, Copy, Check, ChevronDown, X,
+  Zap, Brain, Star, Copy, Check, ChevronDown, X, Globe, FileText, Quote, Cpu,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -420,18 +420,18 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           </span>
         </div>
 
-        {/* Settings */}
+        {/* User avatar — opens settings */}
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className={cn(
-            'flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-xs font-medium transition-all duration-200 border',
-            showSettings
-              ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-              : 'text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
-          )}
           title="Pengaturan"
+          className={cn(
+            'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all flex-shrink-0',
+            showSettings
+              ? 'bg-indigo-500 text-white shadow-md'
+              : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+          )}
         >
-          <Settings2 className="h-3.5 w-3.5" />
+          R
         </button>
       </div>
 
@@ -668,152 +668,205 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           </div>
         </div>
 
-        {/* ── Settings Panel ── */}
+        {/* ── Settings Drawer (slide-in from right, overlay) ── */}
         <AnimatePresence>
           {showSettings && (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 280, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="border-l border-slate-200 bg-white overflow-hidden flex-shrink-0"
-            >
-              <div className="p-5 w-[280px]">
-                <h3 className="font-semibold text-slate-900 text-sm mb-5">Pengaturan Sesi</h3>
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-500">Bahasa Output</label>
-                    <select
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value as Language)}
-                      className="input-field text-xs py-2"
-                    >
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="settings-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="fixed inset-0 z-40 bg-black/10"
+                onClick={() => setShowSettings(false)}
+              />
+              {/* Panel */}
+              <motion.div
+                key="settings-panel"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', stiffness: 340, damping: 34 }}
+                className="fixed right-0 top-0 bottom-0 z-50 w-80 bg-white border-l border-slate-200 shadow-2xl flex flex-col"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-white text-sm font-bold">
+                      R
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">Rizalfanex</p>
+                      <p className="text-[11px] text-slate-400">Sesi akademik aktif</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Scrollable content */}
+                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 scrollbar-hide">
+
+                  {/* ── Output Language ── */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Globe className="h-3.5 w-3.5 text-indigo-400" />
+                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Bahasa Output</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
                       {(Object.entries(LANGUAGE_LABELS) as [Language, string][]).map(([v, l]) => (
-                        <option key={v} value={v}>{l}</option>
+                        <button
+                          key={v}
+                          onClick={() => setLanguage(v)}
+                          className={cn(
+                            'py-2 px-2 rounded-xl text-xs font-medium border transition-all text-center',
+                            language === v
+                              ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                              : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                          )}
+                        >
+                          {l}
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-500">Gaya Sitasi</label>
-                    <select
-                      value={citationStyle}
-                      onChange={(e) => setCitationStyle(e.target.value as CitationStyle)}
-                      className="input-field text-xs py-2"
-                    >
-                      {(Object.entries(CITATION_STYLE_LABELS) as [CitationStyle, string][]).map(([v, l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-500">Jenis Dokumen</label>
-                    <select
-                      value={documentType}
-                      onChange={(e) => useAppStore.getState().setDocumentType(e.target.value as DocumentType)}
-                      className="input-field text-xs py-2"
-                    >
-                      {(Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, { id: string; en: string }][]).map(([v, l]) => (
-                        <option key={v} value={v}>{l.id}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="border-t border-slate-200 pt-4">
-                    <p className="text-xs font-medium text-slate-500 mb-3">Mode AI</p>
+                  {/* ── AI Mode ── */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Cpu className="h-3.5 w-3.5 text-indigo-400" />
+                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Mode AI</p>
+                    </div>
                     <div className="space-y-2">
-                      {/* Fast */}
                       <button
                         onClick={() => setMode('instant')}
                         className={cn(
-                          'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all duration-200',
-                          mode === 'instant' ? 'border-indigo-200 bg-indigo-50' : 'border-transparent hover:bg-slate-100'
+                          'w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl border transition-all text-left',
+                          mode === 'instant'
+                            ? 'bg-indigo-50 border-indigo-200'
+                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                         )}
                       >
-                        <Zap className={cn('h-4 w-4 mt-0.5 flex-shrink-0', AI_MODE_LABELS.instant.color)} />
+                        <div className={cn('flex h-8 w-8 items-center justify-center rounded-xl flex-shrink-0', mode === 'instant' ? 'bg-indigo-100' : 'bg-slate-100')}>
+                          <Zap className={cn('h-4 w-4', mode === 'instant' ? 'text-indigo-500' : 'text-slate-400')} />
+                        </div>
                         <div>
                           <p className="text-xs font-semibold text-slate-800">Cepat</p>
-                          <p className="text-xs text-slate-400 mt-0.5 leading-snug">{AI_MODE_LABELS.instant.description}</p>
+                          <p className="text-[10px] text-slate-400 leading-snug mt-0.5">{AI_MODE_LABELS.instant.description}</p>
                         </div>
+                        {mode === 'instant' && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />}
                       </button>
 
-                      {/* Thinking group */}
                       <button
                         onClick={() => { if (mode === 'instant') setMode('thinking_standard'); }}
                         className={cn(
-                          'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all duration-200',
-                          (mode === 'thinking_standard' || mode === 'thinking_extended') ? 'border-indigo-200 bg-indigo-50' : 'border-transparent hover:bg-slate-100'
+                          'w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl border transition-all text-left',
+                          (mode === 'thinking_standard' || mode === 'thinking_extended')
+                            ? 'bg-indigo-50 border-indigo-200'
+                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                         )}
                       >
-                        <Brain className={cn('h-4 w-4 mt-0.5 flex-shrink-0', AI_MODE_LABELS.thinking_standard.color)} />
+                        <div className={cn('flex h-8 w-8 items-center justify-center rounded-xl flex-shrink-0', (mode === 'thinking_standard' || mode === 'thinking_extended') ? 'bg-indigo-100' : 'bg-slate-100')}>
+                          <Brain className={cn('h-4 w-4', (mode === 'thinking_standard' || mode === 'thinking_extended') ? 'text-indigo-500' : 'text-slate-400')} />
+                        </div>
                         <div>
                           <p className="text-xs font-semibold text-slate-800">Thinking</p>
-                          <p className="text-xs text-slate-400 mt-0.5 leading-snug">Reasoning mendalam untuk tugas kompleks</p>
+                          <p className="text-[10px] text-slate-400 leading-snug mt-0.5">Reasoning mendalam untuk tugas kompleks</p>
                         </div>
+                        {(mode === 'thinking_standard' || mode === 'thinking_extended') && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />}
                       </button>
 
-                      {/* Sub-options when Thinking is active */}
                       {(mode === 'thinking_standard' || mode === 'thinking_extended') && (
-                        <div className="ml-3 pl-3 border-l-2 border-indigo-100 space-y-1.5">
-                          <button
-                            onClick={() => setMode('thinking_standard')}
-                            className={cn(
-                              'w-full flex items-start gap-2 p-2 rounded-lg border text-left transition-all',
-                              mode === 'thinking_standard' ? 'border-indigo-200 bg-white' : 'border-transparent hover:bg-slate-50'
-                            )}
-                          >
-                            <Brain className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-indigo-500" />
-                            <div>
-                              <p className="text-xs font-semibold text-slate-700">Standard</p>
-                              <p className="text-[10px] text-slate-400 leading-snug">{AI_MODE_LABELS.thinking_standard.description}</p>
-                            </div>
-                          </button>
-                          <button
-                            onClick={() => setMode('thinking_extended')}
-                            className={cn(
-                              'w-full flex items-start gap-2 p-2 rounded-lg border text-left transition-all',
-                              mode === 'thinking_extended' ? 'border-amber-200 bg-amber-50' : 'border-transparent hover:bg-slate-50'
-                            )}
-                          >
-                            <Star className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-amber-500" />
-                            <div>
-                              <p className="text-xs font-semibold text-slate-700">Extended</p>
-                              <p className="text-[10px] text-slate-400 leading-snug">{AI_MODE_LABELS.thinking_extended.description}</p>
-                            </div>
-                          </button>
+                        <div className="ml-4 pl-3 border-l-2 border-indigo-100 flex flex-col gap-1.5">
+                          {[
+                            { val: 'thinking_standard' as AiMode, icon: Brain, label: 'Standard', desc: AI_MODE_LABELS.thinking_standard.description, color: 'text-indigo-500' },
+                            { val: 'thinking_extended' as AiMode, icon: Star, label: 'Extended', desc: AI_MODE_LABELS.thinking_extended.description, color: 'text-amber-500' },
+                          ].map(({ val, icon: Icon, label, desc, color }) => (
+                            <button
+                              key={val}
+                              onClick={() => setMode(val)}
+                              className={cn(
+                                'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all',
+                                mode === val
+                                  ? val === 'thinking_extended' ? 'border-amber-200 bg-amber-50' : 'border-indigo-200 bg-white'
+                                  : 'border-transparent hover:bg-slate-50'
+                              )}
+                            >
+                              <Icon className={cn('h-3.5 w-3.5 mt-0.5 flex-shrink-0', color)} />
+                              <div>
+                                <p className="text-xs font-semibold text-slate-700">{label}</p>
+                                <p className="text-[10px] text-slate-400 leading-snug">{desc}</p>
+                              </div>
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="border-t border-slate-200 pt-4">
-                    <p className="text-xs font-medium text-slate-500 mb-3">Workflow Akademik</p>
-                    <div className="space-y-1.5">
-                      {[
-                        { taskType: 'thesis_title_generation' as TaskType, label: '🎯 Generator Judul' },
-                        { taskType: 'literature_review_synthesis' as TaskType, label: '📚 Sintesis Tinjauan' },
-                        { taskType: 'methodology_drafting' as TaskType, label: '⚗️ Draft Metodologi' },
-                        { taskType: 'journal_upgrade' as TaskType, label: '⭐ Journal Upgrade' },
-                        { taskType: 'rebuttal_letter' as TaskType, label: '📨 Balas Reviewer' },
-                        { taskType: 'cover_letter' as TaskType, label: '✉️ Cover Letter' },
-                      ].map(({ taskType, label }) => (
+                  {/* ── Citation Style ── */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Quote className="h-3.5 w-3.5 text-indigo-400" />
+                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Gaya Sitasi</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(Object.entries(CITATION_STYLE_LABELS) as [CitationStyle, string][]).map(([v, l]) => (
                         <button
-                          key={taskType}
-                          onClick={() => {
-                            setTaskType(taskType);
-                            toast.success(`Mode aktif: ${TASK_TYPE_LABELS[taskType].id}`);
-                          }}
-                          className="w-full text-left text-xs text-slate-500 hover:text-slate-700 px-2.5 py-2 rounded-lg hover:bg-slate-100 transition"
+                          key={v}
+                          onClick={() => setCitationStyle(v)}
+                          className={cn(
+                            'py-2 px-3 rounded-xl text-xs font-medium border transition-all text-left',
+                            citationStyle === v
+                              ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                              : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                          )}
                         >
-                          {label}
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Document Type ── */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="h-3.5 w-3.5 text-indigo-400" />
+                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Jenis Dokumen</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, { id: string; en: string }][]).map(([v, l]) => (
+                        <button
+                          key={v}
+                          onClick={() => useAppStore.getState().setDocumentType(v)}
+                          className={cn(
+                            'py-2 px-3 rounded-xl text-xs font-medium border transition-all text-left',
+                            documentType === v
+                              ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                              : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                          )}
+                        >
+                          {l.id}
                         </button>
                       ))}
                     </div>
                   </div>
                 </div>
-              </div>
-            </motion.aside>
+
+                {/* Footer */}
+                <div className="px-5 py-4 border-t border-slate-100 bg-slate-50">
+                  <p className="text-[11px] text-slate-400 text-center">
+                    Powered by <span className="text-indigo-400 font-medium">Rizalfanex</span> · Designed for Academics
+                  </p>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
