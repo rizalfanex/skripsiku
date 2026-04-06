@@ -156,9 +156,11 @@ export function Sidebar() {
                             )}
                           >
                             <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-primary-500/70" />
-                            <span className="truncate text-xs flex-1">
-                              {conv.title ?? 'Chat Baru'}
-                            </span>
+                            {conv.title === null ? (
+                              <span className="flex-1 h-3 rounded-md bg-slate-700/60 animate-pulse" />
+                            ) : (
+                              <span className="truncate text-xs flex-1">{conv.title}</span>
+                            )}
                           </button>
                           <button
                             onClick={(e) => {
@@ -189,7 +191,7 @@ export function Sidebar() {
               <button
                 key={conv.id}
                 onClick={() => router.push(`/chat/${conv.id}`)}
-                title={conv.title ?? 'Chat Baru'}
+                title={conv.title ?? '...'}
                 className={cn(
                   'flex w-full items-center justify-center rounded-xl p-2 mb-0.5 transition',
                   activeConvId === conv.id
