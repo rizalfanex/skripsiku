@@ -169,7 +169,7 @@ class AcademicOrchestrator:
         step_name: str,
     ) -> AsyncIterator[str]:
         model = _model_for_mode(mode, "main")
-        system_prompt = self.builder.build_system_prompt(**ctx)
+        system_prompt = self.builder.build_system_prompt(**ctx, mode=mode)
         full_messages = [{"role": "system", "content": system_prompt}] + messages
 
         yield _sse({"type": "start", "step": step_name, "model": model})
@@ -198,7 +198,7 @@ class AcademicOrchestrator:
         Same token budget as Instant, but deeper output via structured reasoning prompt.
         """
         model = _model_for_mode("thinking_standard", "main")
-        system_prompt = self.builder.build_system_prompt(**ctx)
+        system_prompt = self.builder.build_system_prompt(**ctx, mode="thinking_standard")
         analysis_prompt = self.builder.build_analysis_overlay(**ctx)
 
         cot_instruction = (
@@ -215,7 +215,6 @@ class AcademicOrchestrator:
             [{"role": "system", "content": system_prompt + "\n\n" + analysis_prompt + cot_instruction}]
             + messages
         )
-
         yield _sse({"type": "start", "step": "deep_analysis", "model": model})
 
         stream_gen = await nvidia_provider.complete(
@@ -245,7 +244,7 @@ class AcademicOrchestrator:
         """
         instruct_model = settings.model_instant
         thinking_model = settings.model_thinking_extended
-        system_prompt = self.builder.build_system_prompt(**ctx)
+        system_prompt = self.builder.build_system_prompt(**ctx, mode="thinking_extended")
         step_tokens = settings.llm_max_tokens_extended  # same budget per step
 
         # ── Step 1: Draft (thinking process — hidden by default on frontend) ───
@@ -253,7 +252,7 @@ class AcademicOrchestrator:
         yield _sse({"type": "start", "step": "initial_draft", "model": instruct_model})
 
         draft_messages = [
-            {"role": "system", "content": system_prompt + "\n\nStep 1 — Draft: Outline the structure then write a comprehensive initial draft."},
+            {"role": "system", "content": system_prompt + "\n\nStep 1 — Draft: Begin with a short preamble (objective + approach), then write a comprehensive initial draft structured for final revision."},
             *messages,
         ]
         draft_stream = await nvidia_provider.complete(
@@ -307,7 +306,7 @@ class AcademicOrchestrator:
         yield _sse({"type": "start", "step": "final_revision", "model": instruct_model})
 
         revision_messages = [
-            {"role": "system", "content": system_prompt + "\n\nYou have completed a draft and academic critique. Now produce the final, publication-ready version incorporating all improvements. Output ONLY the final version."},
+            {"role": "system", "content": system_prompt + "\n\nStep 3 — Final Answer: You have completed a draft and deep critique. Now produce the final polished output. Apply the THINKING_EXTENDED response shape: include assumptions, solution, verification/caveats, and actionable next steps. Output ONLY the final version — clean, grounded, and implementation-ready."},
             *messages,
             {"role": "assistant", "content": f"## Draft\n{draft_content}"},
             {"role": "assistant", "content": f"## Critique\n{critique_content}"},
