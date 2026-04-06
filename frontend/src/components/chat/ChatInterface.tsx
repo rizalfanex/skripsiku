@@ -686,8 +686,8 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                       R
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Rizalfanex</p>
-                      <p className="text-[11px] text-slate-400">Sesi akademik aktif</p>
+                      <p className="text-sm font-semibold text-slate-900">Pengguna Lokal</p>
+                      <p className="text-[11px] text-slate-400">Mode Lokal</p>
                     </div>
                   </div>
                   <button
