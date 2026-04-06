@@ -476,23 +476,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
             <div ref={chatEndRef} />
           </div>
 
-          {/* ── Quick Actions Bar ── */}
-          <div className="border-t border-slate-200 px-4 pt-3">
-            <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
-              {QUICK_ACTIONS.map((action) => (
-                <button
-                  key={action.taskType}
-                  onClick={() => handleQuickAction(action)}
-                  disabled={isLoading}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span>{action.icon}</span>
-                  <span className="whitespace-nowrap">{action.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* ── Input ── */}
           <div className="border-t border-slate-200 p-4">
 
