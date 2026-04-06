@@ -94,10 +94,15 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
             if (!currentConvIdRef.current) {
               currentConvIdRef.current = event.conversation_id;
               pendingConvIdRef.current = event.conversation_id;
-              // Inject placeholder immediately — conversation IS in DB at this point
+              // Use first user message (truncated) as placeholder — replaced by AI title later
+              const cleanContent = content.trim();
+              const placeholderTitle =
+                cleanContent.length > 60
+                  ? cleanContent.slice(0, 57).trimEnd() + '...'
+                  : cleanContent || 'Chat Baru';
               upsertSidebarConversation({
                 id: event.conversation_id,
-                title: null,
+                title: placeholderTitle,
                 project_id: activeProject?.id ?? null,
                 mode,
                 task_type: taskType,
