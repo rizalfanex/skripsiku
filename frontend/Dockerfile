@@ -34,8 +34,7 @@ ENV HOSTNAME=0.0.0.0
 # Copy the standalone server and static assets
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-# Copy public folder only if it exists (Next.js standalone requires it even if empty)
-RUN mkdir -p ./public
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
