@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
-  Zap, Brain, Star, RotateCcw, Copy, Check, MessageSquarePlus, ChevronDown, X,
+  Zap, Brain, Star, Copy, Check, ChevronDown, X,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -324,32 +324,14 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
         <button
           onClick={() => setShowSettings(!showSettings)}
           className={cn(
-            'flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 border',
+            'flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-xs font-medium transition-all duration-200 border',
             showSettings
               ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
               : 'text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
           )}
+          title="Pengaturan"
         >
           <Settings2 className="h-3.5 w-3.5" />
-          <span className="hidden md:inline">Pengaturan</span>
-        </button>
-
-        {/* New chat */}
-        <button
-          onClick={() => router.push(`/chat?n=${Date.now()}`)}
-          className="btn-ghost text-xs px-3 py-2"
-          title="Chat Baru"
-        >
-          <MessageSquarePlus className="h-3.5 w-3.5" />
-        </button>
-
-        {/* Clear */}
-        <button
-          onClick={clearMessages}
-          className="btn-ghost text-xs px-3 py-2"
-          title="Bersihkan percakapan"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
         </button>
       </div>
 
