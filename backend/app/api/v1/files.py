@@ -13,6 +13,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, status
+from fastapi.responses import Response
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/files", tags=["files"])
@@ -164,6 +165,7 @@ async def get_file_text(file_id: str) -> dict:
     return {"file_id": file_id, "filename": entry["filename"], "text": entry["text"]}
 
 
-@router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_file(file_id: str) -> None:
+@router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+async def delete_file(file_id: str) -> Response:
     _store.pop(file_id, None)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
