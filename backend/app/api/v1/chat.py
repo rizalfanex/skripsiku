@@ -90,6 +90,10 @@ async def chat_stream(
     user_message_content = body.messages[-1].content if body.messages else ""
     conversation, is_new_conversation = await _get_or_create_conversation(db, body, current_user.id)
 
+    # Set title immediately on first commit so it's always in DB, even if stream fails
+    if is_new_conversation and not conversation.title:
+        conversation.title = _make_title(user_message_content)
+
     user_msg = Message(
         conversation_id=conversation.id,
         role="user",
@@ -107,6 +111,10 @@ async def chat_stream(
         complete_event: str | None = None
 
         yield f"data: {json.dumps({'type': 'meta', 'conversation_id': conversation.id})}\n\n"
+
+        # Send title immediately if this is a new conversation (already committed to DB)
+        if is_new_conversation and conversation.title:
+            yield f"data: {json.dumps({'type': 'title_update', 'title': conversation.title, 'conversation_id': conversation.id})}\n\n"
 
         try:
             async for chunk in orchestrator.stream(
@@ -143,15 +151,8 @@ async def chat_stream(
                     )
                     db.add(assistant_msg)
 
-                    if is_new_conversation and not conversation.title:
-                        # Use instant truncation title — avoids async LLM call inside generator
-                        conversation.title = _make_title(user_message_content)
-
                     conversation.updated_at = datetime.now(timezone.utc)
                     await db.commit()
-
-                    if is_new_conversation and conversation.title:
-                        yield f"data: {json.dumps({'type': 'title_update', 'title': conversation.title, 'conversation_id': conversation.id})}\n\n"
 
                 except Exception as exc:
                     logger.error("Failed to persist assistant message: %s", exc, exc_info=True)
