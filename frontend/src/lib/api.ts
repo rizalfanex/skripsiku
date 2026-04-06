@@ -114,3 +114,23 @@ export const exportApi = {
     URL.revokeObjectURL(url);
   },
 };
+
+// ── Files ─────────────────────────────────────────────────────────────────────
+export const filesApi = {
+  upload: async (file: File): Promise<{ file_id: string; filename: string; char_count: number }> => {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await api.post<{ file_id: string; filename: string; char_count: number }>(
+      '/api/v1/files/upload',
+      form,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return res.data;
+  },
+
+  getText: (fileId: string): Promise<{ file_id: string; filename: string; text: string }> =>
+    api.get(`/api/v1/files/${fileId}`).then((r) => r.data),
+
+  delete: (fileId: string): Promise<void> =>
+    api.delete(`/api/v1/files/${fileId}`).then(() => undefined),
+};

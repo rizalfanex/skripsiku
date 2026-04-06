@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, projects, chat, export, conversations
+from app.api.v1 import auth, projects, chat, export, conversations, files
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(auth.router)
@@ -7,3 +7,4 @@ api_router.include_router(projects.router)
 api_router.include_router(chat.router)
 api_router.include_router(conversations.router)
 api_router.include_router(export.router)
+api_router.include_router(files.router)

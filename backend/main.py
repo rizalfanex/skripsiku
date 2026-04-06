@@ -50,6 +50,9 @@ async def startup() -> None:
     async for db in get_db():
         await ensure_local_user(db)
         break
+    # Start file expiry cleanup background task
+    from app.api.v1.files import start_cleanup_task  # noqa: PLC0415
+    start_cleanup_task()
     logger.info("Skripsiku backend ready on port %d", settings.backend_port)
 
 

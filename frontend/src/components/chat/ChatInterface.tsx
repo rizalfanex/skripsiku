@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
-  Zap, Brain, Star, Copy, Check, ChevronDown, X, Globe, FileText, Quote, Cpu,
+  Zap, Brain, Star, Copy, Check, ChevronDown, X, Globe, FileText, Quote, Cpu, Paperclip,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -13,6 +13,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import toast from 'react-hot-toast';
 import { useAppStore } from '@/store/useAppStore';
 import { useChat } from '@/hooks/useChat';
+import { filesApi } from '@/lib/api';
 import {
   AI_MODE_LABELS, LANGUAGE_LABELS, CITATION_STYLE_LABELS,
   TASK_TYPE_LABELS, DOCUMENT_TYPE_LABELS, cn,
@@ -316,6 +317,9 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   } = useAppStore();
 
   const [input, setInput] = useState('');
+  const [attachment, setAttachment] = useState<{ fileId: string; filename: string; charCount: number } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentTitle, setCurrentTitle] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -376,11 +380,49 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isThinking]);
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = '';
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const result = await filesApi.upload(file);
+      setAttachment({ fileId: result.file_id, filename: result.filename, charCount: result.char_count });
+      toast.success(`File "${result.filename}" berhasil dibaca`);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail ?? 'Gagal membaca file');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveAttachment = async () => {
+    if (attachment) {
+      await filesApi.delete(attachment.fileId).catch(() => {});
+      setAttachment(null);
+    }
+  };
+
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if ((!text && !attachment) || isLoading) return;
     setInput('');
-    await sendMessage(text);
+
+    let fullMessage = text;
+    if (attachment) {
+      try {
+        const { text: fileText } = await filesApi.getText(attachment.fileId);
+        fullMessage = `[File: ${attachment.filename}]\n\n${fileText}\n\n---\n\n${text || 'Tolong analisis dan beri penjelasan mengenai dokumen ini.'}`;
+      } catch {
+        toast.error('File sudah kedaluwarsa, silakan unggah ulang');
+        setAttachment(null);
+        return;
+      }
+      setAttachment(null);
+    }
+
+    await sendMessage(fullMessage);
   };
 
   const handleQuickAction = async (action: typeof QUICK_ACTIONS[0]) => {
@@ -535,11 +577,32 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
           {/* ── Input ── */}
           <div className="px-4 pb-5 pt-3 bg-slate-50">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
             {/* Pill container */}
             <div className={cn(
               'mx-auto w-full max-w-3xl rounded-3xl bg-white border border-slate-200 shadow-sm transition-shadow duration-200',
               'focus-within:shadow-md focus-within:border-slate-300'
             )}>
+              {/* Attachment badge */}
+              {attachment && (
+                <div className="flex items-center gap-2 px-5 pt-3">
+                  <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 max-w-xs">
+                    <FileText className="h-3.5 w-3.5 text-indigo-400 flex-shrink-0" />
+                    <span className="text-xs text-indigo-700 font-medium truncate">{attachment.filename}</span>
+                    <span className="text-[10px] text-indigo-400 flex-shrink-0">{(attachment.charCount / 1000).toFixed(1)}k chars</span>
+                    <button onClick={handleRemoveAttachment} className="text-indigo-300 hover:text-indigo-500 transition flex-shrink-0">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
               {/* Textarea */}
               <div className="px-5 pt-4">
                 <TextareaAutosize
@@ -621,23 +684,44 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                 </div>
 
                 {/* Send / Stop */}
-                {isLoading ? (
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {/* Paperclip */}
                   <button
-                    onClick={stopGeneration}
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500 hover:bg-rose-200 transition"
-                    title="Hentikan"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading || isUploading}
+                    title="Lampirkan file (PDF, DOCX, XLSX, PPTX, TXT)"
+                    className={cn(
+                      'flex h-8 w-8 items-center justify-center rounded-full transition-all',
+                      attachment
+                        ? 'bg-indigo-100 text-indigo-500'
+                        : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600',
+                      (isLoading || isUploading) && 'opacity-40 cursor-not-allowed'
+                    )}
                   >
-                    <Square className="h-3.5 w-3.5" />
+                    {isUploading
+                      ? <span className="h-3.5 w-3.5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                      : <Paperclip className="h-3.5 w-3.5" />
+                    }
                   </button>
-                ) : (
-                  <button
-                    onClick={handleSend}
-                    disabled={!input.trim()}
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500 text-white hover:bg-indigo-600 transition-all shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                  </button>
-                )}
+
+                  {isLoading ? (
+                    <button
+                      onClick={stopGeneration}
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500 hover:bg-rose-200 transition"
+                      title="Hentikan"
+                    >
+                      <Square className="h-3.5 w-3.5" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSend}
+                      disabled={!input.trim() && !attachment}
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500 text-white hover:bg-indigo-600 transition-all shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             {/* Disclaimer */}
