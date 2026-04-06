@@ -55,10 +55,10 @@ function ThinkingPanel({ content, isStreaming }: { content: string; isStreaming?
   }, [isStreaming]);
 
   return (
-    <div className="mt-2 rounded-xl border border-primary-500/10 bg-navy-950/60 overflow-hidden">
+    <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-slate-500 hover:text-slate-700 transition-colors"
       >
         <Brain className="h-3 w-3 text-primary-400 flex-shrink-0" />
         <span className="flex-1 text-left">
@@ -70,7 +70,7 @@ function ThinkingPanel({ content, isStreaming }: { content: string; isStreaming?
         />
       </button>
       {open && (
-        <div className="px-3 pb-3 text-xs text-slate-500 max-h-64 overflow-y-auto scrollbar-hide border-t border-primary-500/10 pt-2">
+        <div className="px-3 pb-3 text-xs text-slate-500 max-h-64 overflow-y-auto scrollbar-hide border-t border-slate-200 pt-2">
           <div className="prose-academic opacity-80">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           </div>
@@ -89,7 +89,7 @@ function CopyButton({ content }: { content: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className="p-1.5 rounded-lg text-slate-600 hover:text-slate-300 hover:bg-white/5 transition"
+      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
       title="Salin"
     >
       {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -174,10 +174,10 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
   return (
     <div className="flex h-full flex-col">
       {/* ── Top Bar ── */}
-      <div className="flex h-14 items-center gap-4 border-b border-primary-500/10 px-4 flex-shrink-0">
+      <div className="flex h-14 items-center gap-4 border-b border-slate-200 bg-white px-4 flex-shrink-0">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <BookOpen className="h-4 w-4 text-primary-500 flex-shrink-0" />
-          <span className="font-semibold text-white text-sm truncate">
+          <span className="font-semibold text-slate-900 text-sm truncate">
             {currentTitle ?? headerTitle ?? 'Skripsiku'}
           </span>
         </div>
@@ -188,8 +188,8 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           className={cn(
             'flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 border',
             showSettings
-              ? 'bg-primary-500/10 text-primary-300 border-primary-500/30'
-              : 'text-slate-400 border-transparent hover:bg-white/5 hover:text-slate-200'
+              ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+              : 'text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
           )}
         >
           <Settings2 className="h-3.5 w-3.5" />
@@ -225,7 +225,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
               <div className="flex flex-col gap-4 opacity-40">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className={cn('flex gap-3', i % 2 === 0 ? 'justify-end' : 'justify-start')}>
-                    <div className="h-12 bg-navy-800 rounded-2xl animate-pulse w-64" />
+                    <div className="h-12 bg-slate-200 rounded-2xl animate-pulse w-64" />
                   </div>
                 ))}
               </div>
@@ -234,11 +234,11 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
             {/* Empty state */}
             {historyLoaded && messages.length === 0 && !isLoading && (
               <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                <div className="w-16 h-16 rounded-2xl bg-primary-500/10 flex items-center justify-center mb-6">
-                  <BookOpen className="h-8 w-8 text-primary-400" />
+                <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-6">
+                  <BookOpen className="h-8 w-8 text-indigo-500" />
                 </div>
-                <h2 className="text-xl font-bold text-white mb-3">Halo! Saya Skripsiku</h2>
-                <p className="text-slate-400 text-sm max-w-md leading-relaxed mb-8">
+                <h2 className="text-xl font-bold text-slate-900 mb-3">Halo! Saya Skripsiku</h2>
+                <p className="text-slate-500 text-sm max-w-md leading-relaxed mb-8">
                   Asisten AI akademik Anda. Ketik pertanyaan, paste teks, atau pilih satu tool di bawah.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-xl">
@@ -248,7 +248,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                       onClick={() =>
                         setInput(`Paste teks Anda di sini untuk ${TASK_TYPE_LABELS[action.taskType].id.toLowerCase()}...`)
                       }
-                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-navy-800 border border-primary-500/10 text-xs text-slate-400 hover:text-slate-200 hover:border-primary-500/30 transition-all text-left"
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-500 hover:text-slate-700 hover:border-indigo-200 transition-all text-left shadow-sm"
                     >
                       <span>{action.icon}</span>
                       <span>{action.label}</span>
@@ -267,16 +267,16 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   className={cn('flex gap-3', msg.role === 'user' ? 'justify-end' : 'justify-start')}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center">
-                      <BookOpen className="h-4 w-4 text-white" />
+                    <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <BookOpen className="h-4 w-4 text-indigo-600" />
                     </div>
                   )}
                   <div
                     className={cn(
                       'max-w-2xl rounded-2xl px-4 py-3 text-sm relative group',
                       msg.role === 'user'
-                        ? 'bg-primary-500/15 border border-primary-500/20 text-slate-200 rounded-tr-sm'
-                        : 'bg-navy-800 border border-primary-500/10 rounded-tl-sm'
+                        ? 'bg-indigo-50 border border-indigo-200 text-slate-800 rounded-tr-sm'
+                        : 'bg-white border border-slate-200 rounded-tl-sm shadow-sm'
                     )}
                   >
                     {msg.role === 'user' ? (
@@ -296,7 +296,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                     )}
                   </div>
                   {msg.role === 'user' && (
-                    <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-300">
+                    <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-600">
                       U
                     </div>
                   )}
@@ -311,10 +311,10 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   animate={{ opacity: 1, y: 0 }}
                   className="flex gap-3 justify-start"
                 >
-                  <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center animate-pulse-slow">
-                    <BookOpen className="h-4 w-4 text-white" />
+                  <div className="flex-shrink-0 mt-1 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center animate-pulse-slow">
+                    <BookOpen className="h-4 w-4 text-indigo-600" />
                   </div>
-                  <div className="max-w-2xl rounded-2xl rounded-tl-sm bg-navy-800 border border-primary-500/10 px-4 py-3 text-sm flex-1">
+                  <div className="max-w-2xl rounded-2xl rounded-tl-sm bg-white border border-slate-200 shadow-sm px-4 py-3 text-sm flex-1">
                     {/* Thinking panel: shows steps 1 & 2 content during thinking_extended */}
                     {(isThinking || streamingThinking) && (
                       <ThinkingPanel content={streamingThinking} isStreaming={isThinking} />
@@ -323,9 +323,9 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                     {/* Active step label when NOT in thinking phase (step 3 / final revision) */}
                     {activeStep && !isThinking && !streamingThinking && (
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-500/10 border border-primary-500/20">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200">
                           <ThinkingDots />
-                          <span className="text-xs text-primary-300 font-medium">
+                          <span className="text-xs text-indigo-600 font-medium">
                             {activeStep === 'initial_draft' ? 'Menyusun draf...' :
                              activeStep === 'academic_reasoning' ? 'Analisis akademik mendalam...' :
                              activeStep === 'final_revision' ? 'Mempoles hasil akhir...' :
@@ -356,14 +356,14 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           </div>
 
           {/* ── Quick Actions Bar ── */}
-          <div className="border-t border-primary-500/10 px-4 pt-3">
+          <div className="border-t border-slate-200 px-4 pt-3">
             <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
               {QUICK_ACTIONS.map((action) => (
                 <button
                   key={action.taskType}
                   onClick={() => handleQuickAction(action)}
                   disabled={isLoading}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-primary-500/10 bg-navy-800 text-xs text-slate-400 hover:text-slate-200 hover:border-primary-500/25 hover:bg-primary-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-500 hover:text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span>{action.icon}</span>
                   <span className="whitespace-nowrap">{action.label}</span>
@@ -373,7 +373,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           </div>
 
           {/* ── Input ── */}
-          <div className="border-t border-primary-500/10 p-4">
+          <div className="border-t border-slate-200 p-4">
 
             {/* Mode selector — right above the textarea */}
             <div className="flex items-center gap-1.5 mb-2.5">
@@ -439,52 +439,52 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
               animate={{ width: 280, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="border-l border-primary-500/10 bg-navy-900 overflow-hidden flex-shrink-0"
+              className="border-l border-slate-200 bg-white overflow-hidden flex-shrink-0"
             >
               <div className="p-5 w-[280px]">
-                <h3 className="font-semibold text-white text-sm mb-5">Pengaturan Sesi</h3>
+                <h3 className="font-semibold text-slate-900 text-sm mb-5">Pengaturan Sesi</h3>
                 <div className="space-y-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-400">Bahasa Output</label>
+                    <label className="text-xs font-medium text-slate-500">Bahasa Output</label>
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value as Language)}
                       className="input-field text-xs py-2"
                     >
                       {(Object.entries(LANGUAGE_LABELS) as [Language, string][]).map(([v, l]) => (
-                        <option key={v} value={v} className="bg-navy-800">{l}</option>
+                        <option key={v} value={v}>{l}</option>
                       ))}
                     </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-400">Gaya Sitasi</label>
+                    <label className="text-xs font-medium text-slate-500">Gaya Sitasi</label>
                     <select
                       value={citationStyle}
                       onChange={(e) => setCitationStyle(e.target.value as CitationStyle)}
                       className="input-field text-xs py-2"
                     >
                       {(Object.entries(CITATION_STYLE_LABELS) as [CitationStyle, string][]).map(([v, l]) => (
-                        <option key={v} value={v} className="bg-navy-800">{l}</option>
+                        <option key={v} value={v}>{l}</option>
                       ))}
                     </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-400">Jenis Dokumen</label>
+                    <label className="text-xs font-medium text-slate-500">Jenis Dokumen</label>
                     <select
                       value={documentType}
                       onChange={(e) => useAppStore.getState().setDocumentType(e.target.value as DocumentType)}
                       className="input-field text-xs py-2"
                     >
                       {(Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, { id: string; en: string }][]).map(([v, l]) => (
-                        <option key={v} value={v} className="bg-navy-800">{l.id}</option>
+                        <option key={v} value={v}>{l.id}</option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="border-t border-primary-500/10 pt-4">
-                    <p className="text-xs font-medium text-slate-400 mb-3">Mode AI</p>
+                  <div className="border-t border-slate-200 pt-4">
+                    <p className="text-xs font-medium text-slate-500 mb-3">Mode AI</p>
                     <div className="space-y-2">
                       {(Object.entries(AI_MODE_LABELS) as [AiMode, (typeof AI_MODE_LABELS)[AiMode]][]).map(([m, info]) => {
                         const Icon = MODE_ICONS[m];
@@ -495,14 +495,14 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                             className={cn(
                               'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all duration-200',
                               mode === m
-                                ? 'border-primary-500/30 bg-primary-500/10'
-                                : 'border-transparent hover:bg-white/5'
+                                ? 'border-indigo-200 bg-indigo-50'
+                                : 'border-transparent hover:bg-slate-100'
                             )}
                           >
                             <Icon className={cn('h-4 w-4 mt-0.5 flex-shrink-0', info.color)} />
                             <div>
-                              <p className="text-xs font-semibold text-white">{info.labelId}</p>
-                              <p className="text-xs text-slate-500 mt-0.5 leading-snug">{info.description}</p>
+                              <p className="text-xs font-semibold text-slate-800">{info.labelId}</p>
+                              <p className="text-xs text-slate-400 mt-0.5 leading-snug">{info.description}</p>
                             </div>
                           </button>
                         );
@@ -510,8 +510,8 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                     </div>
                   </div>
 
-                  <div className="border-t border-primary-500/10 pt-4">
-                    <p className="text-xs font-medium text-slate-400 mb-3">Workflow Akademik</p>
+                  <div className="border-t border-slate-200 pt-4">
+                    <p className="text-xs font-medium text-slate-500 mb-3">Workflow Akademik</p>
                     <div className="space-y-1.5">
                       {[
                         { taskType: 'thesis_title_generation' as TaskType, label: '🎯 Generator Judul' },
@@ -527,7 +527,7 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                             setTaskType(taskType);
                             toast.success(`Mode aktif: ${TASK_TYPE_LABELS[taskType].id}`);
                           }}
-                          className="w-full text-left text-xs text-slate-400 hover:text-slate-200 px-2.5 py-2 rounded-lg hover:bg-white/5 transition"
+                          className="w-full text-left text-xs text-slate-500 hover:text-slate-700 px-2.5 py-2 rounded-lg hover:bg-slate-100 transition"
                         >
                           {label}
                         </button>

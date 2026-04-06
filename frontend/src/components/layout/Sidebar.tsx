@@ -63,11 +63,11 @@ export function Sidebar() {
         initial={false}
         animate={{ width: sidebarOpen ? 260 : 68 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="relative flex h-full flex-col border-r border-primary-500/10 bg-navy-900"
+        className="relative flex h-full flex-col border-r border-slate-200 bg-white"
         style={{ minWidth: sidebarOpen ? 260 : 68 }}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-primary-500/10 px-4">
+        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-4">
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary-500 shadow-lg shadow-primary-500/30">
             <BookOpen className="h-4 w-4 text-white" />
           </div>
@@ -76,14 +76,14 @@ export function Sidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-base font-bold text-white"
+              className="text-base font-bold text-slate-900"
             >
               Skripsiku
             </motion.span>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="ml-auto flex-shrink-0 rounded-lg p-1 text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
+            className="ml-auto flex-shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
           >
             {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </button>
@@ -95,7 +95,7 @@ export function Sidebar() {
             onClick={() => router.push(`/chat?n=${Date.now()}`)}
             className={cn(
               'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200',
-              'bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 border border-primary-500/20'
+            'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
             )}
           >
             <Plus className="h-4 w-4 flex-shrink-0" />
@@ -108,7 +108,7 @@ export function Sidebar() {
           {/* Kelola section — always on top */}
           <div className="mb-2">
             {sidebarOpen && (
-              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                 Kelola
               </p>
             )}
@@ -128,9 +128,9 @@ export function Sidebar() {
           </div>
 
           {/* History section — below Kelola */}
-          <div className="border-t border-primary-500/10 pt-2 mt-1">
+          <div className="border-t border-slate-200 pt-2 mt-1">
             {sidebarOpen && (
-              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+              <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                 Riwayat Chat
               </p>
             )}
@@ -140,7 +140,7 @@ export function Sidebar() {
               <div>
                 {groups.map((group) => (
                   <div key={group.label} className="mb-3">
-                    <p className="mb-1 px-2 text-[10px] font-medium text-slate-700">
+                    <p className="mb-1 px-2 text-[10px] font-medium text-slate-400">
                       {group.label}
                     </p>
                     <ul className="space-y-0.5">
@@ -151,11 +151,11 @@ export function Sidebar() {
                             className={cn(
                               'flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-all',
                               activeConvId === conv.id
-                                ? 'bg-primary-500/15 text-slate-200 border border-primary-500/20'
-                                : 'text-slate-400 hover:bg-white/5 hover:text-slate-300'
+                                ? 'bg-indigo-50 text-slate-800 border border-indigo-200'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                             )}
                           >
-                            <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-primary-500/70" />
+                            <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-indigo-500" />
                             <span className="truncate text-xs flex-1">{conv.title ?? 'Chat Baru'}</span>
                           </button>
                           <button
@@ -164,7 +164,7 @@ export function Sidebar() {
                               if (activeConvId === conv.id) router.push('/chat');
                               remove(conv.id);
                             }}
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 hidden group-hover/item:flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 hidden group-hover/item:flex h-6 w-6 items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition"
                             title="Hapus chat"
                           >
                             <Trash2 className="h-3 w-3" />
@@ -179,7 +179,7 @@ export function Sidebar() {
 
             {/* Expanded: empty state */}
             {sidebarOpen && conversations.length === 0 && (
-              <p className="px-2 py-3 text-xs text-slate-600">Belum ada riwayat chat.</p>
+              <p className="px-2 py-3 text-xs text-slate-400">Belum ada riwayat chat.</p>
             )}
 
             {/* Collapsed: conversation icons */}
@@ -191,8 +191,8 @@ export function Sidebar() {
                 className={cn(
                   'flex w-full items-center justify-center rounded-xl p-2 mb-0.5 transition',
                   activeConvId === conv.id
-                    ? 'bg-primary-500/15 text-primary-300'
-                    : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
                 )}
               >
                 <MessageSquare className="h-4 w-4" />
@@ -202,15 +202,15 @@ export function Sidebar() {
         </nav>
 
         {/* User footer */}
-        <div className="border-t border-primary-500/10 p-3">
+        <div className="border-t border-slate-200 p-3">
           {sidebarOpen ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-500/20 text-sm font-semibold text-primary-300">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600">
                 ✦
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-xs font-medium text-slate-300">Pengguna Lokal</p>
-                <p className="truncate text-xs text-slate-500">Mode Lokal</p>
+                <p className="truncate text-xs font-medium text-slate-700">Pengguna Lokal</p>
+                <p className="truncate text-xs text-slate-400">Mode Lokal</p>
               </div>
             </div>
           ) : (
