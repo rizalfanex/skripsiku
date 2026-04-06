@@ -56,10 +56,10 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
   }, [conversationId]);
 
   const sendMessage = useCallback(
-    async (content: string, overrideTask?: TaskType) => {
+    async (content: string, overrideTask?: TaskType, displayMeta?: { displayContent?: string; fileAttachment?: { filename: string } }) => {
       if (isLoading) return;
 
-      const userMsg: ChatMessage = { role: 'user', content };
+      const userMsg: ChatMessage = { role: 'user', content, ...displayMeta };
       const newMessages = [...messages, userMsg];
       setMessages(newMessages);
       setIsLoading(true);
@@ -71,6 +71,9 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
       const controller = new AbortController();
       abortRef.current = controller;
 
+      // Strip display-only fields before sending to the API
+      const apiMessages = newMessages.map(({ role, content }) => ({ role, content }));
+
       try {
         let fullContent = '';
         let thinkingContent = '';
@@ -79,7 +82,7 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
           {
             project_id: activeProject?.id,
             conversation_id: currentConvIdRef.current ?? undefined,
-            messages: newMessages,
+            messages: apiMessages,
             mode,
             task_type: overrideTask ?? taskType,
             language,

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
   Zap, Brain, Star, Copy, Check, ChevronDown, X, Globe, FileText, Quote, Cpu, Paperclip,
+  FileSpreadsheet, File,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -406,6 +407,15 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
     }
   };
 
+  const getFileIcon = (filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+    if (ext === 'pdf') return { Icon: FileText, color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', label: 'PDF' };
+    if (ext === 'docx' || ext === 'doc') return { Icon: FileText, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200', label: 'Word' };
+    if (ext === 'xlsx' || ext === 'xls') return { Icon: FileSpreadsheet, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', label: 'Excel' };
+    if (ext === 'pptx' || ext === 'ppt') return { Icon: FileText, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-200', label: 'PowerPoint' };
+    return { Icon: File, color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', label: 'TXT' };
+  };
+
   const handleSend = async () => {
     const text = input.trim();
     if ((!text && !attachment) || isLoading) return;
@@ -413,15 +423,21 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
     let fullMessage = text;
     if (attachment) {
+      const currentAttachment = attachment;
       try {
-        const { text: fileText } = await filesApi.getText(attachment.fileId);
-        fullMessage = `[File: ${attachment.filename}]\n\n${fileText}\n\n---\n\n${text || 'Tolong analisis dan beri penjelasan mengenai dokumen ini.'}`;
+        const { text: fileText } = await filesApi.getText(currentAttachment.fileId);
+        fullMessage = `[File: ${currentAttachment.filename}]\n\n${fileText}\n\n---\n\n${text || 'Tolong analisis dan beri penjelasan mengenai dokumen ini.'}`;
       } catch {
         toast.error('File sudah kedaluwarsa, silakan unggah ulang');
         setAttachment(null);
         return;
       }
       setAttachment(null);
+      await sendMessage(fullMessage, undefined, {
+        displayContent: text || 'Tolong analisis dan beri penjelasan mengenai dokumen ini.',
+        fileAttachment: { filename: currentAttachment.filename },
+      });
+      return;
     }
 
     await sendMessage(fullMessage);
@@ -487,7 +503,19 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                 >
                   {msg.role === 'user' ? (
                     <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm bg-indigo-50 border border-indigo-200 text-slate-800">
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                      {msg.fileAttachment && (() => {
+                        const { Icon, color, bg, border, label } = getFileIcon(msg.fileAttachment.filename);
+                        return (
+                          <div className={`flex items-center gap-2 mb-2 px-2.5 py-1.5 rounded-lg ${bg} border ${border} w-fit`}>
+                            <Icon className={`w-4 h-4 ${color} flex-shrink-0`} />
+                            <span className={`text-xs font-medium ${color}`}>{label}</span>
+                            <span className="text-xs text-slate-600 max-w-[180px] truncate">{msg.fileAttachment.filename}</span>
+                          </div>
+                        );
+                      })()}
+                      {(msg.displayContent ?? msg.content) && (
+                        <p className="whitespace-pre-wrap">{msg.displayContent ?? msg.content}</p>
+                      )}
                     </div>
                   ) : (
                     <div className="w-full text-sm relative group">

@@ -87,6 +87,10 @@ export interface ChatMessage {
   content: string;
   /** Accumulated thinking/reasoning steps (thinking_extended mode only). Hidden by default. */
   thinkingContent?: string;
+  /** Text shown in the chat bubble instead of raw content (used for file messages). */
+  displayContent?: string;
+  /** File attachment metadata shown as a badge in the chat bubble. */
+  fileAttachment?: { filename: string };
 }
 
 export interface Message extends ChatMessage {
