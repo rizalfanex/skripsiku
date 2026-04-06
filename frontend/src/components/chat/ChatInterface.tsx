@@ -477,102 +477,111 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           </div>
 
           {/* ── Input ── */}
-          <div className="border-t border-slate-200 p-4">
-
-            {/* Mode selector — right above the textarea */}
-            <div className="mb-2.5">
-              <div className="flex items-center gap-1.5">
-                {/* Fast button */}
-                <button
-                  onClick={() => setMode('instant')}
-                  disabled={isLoading}
-                  className={cn('mode-pill', mode === 'instant' && 'active')}
-                  title={AI_MODE_LABELS.instant.description}
-                >
-                  <Zap className="h-3 w-3" />
-                  <span>Cepat</span>
-                </button>
-
-                {/* Thinking group button */}
-                <button
-                  onClick={() => { if (mode === 'instant') setMode('thinking_standard'); }}
-                  disabled={isLoading}
-                  className={cn('mode-pill', (mode === 'thinking_standard' || mode === 'thinking_extended') && 'active')}
-                  title="Mode berpikir mendalam"
-                >
-                  <Brain className="h-3 w-3" />
-                  <span>Thinking</span>
-                </button>
-
-                <span className="ml-auto text-[11px] text-slate-400 hidden sm:block">
-                  {AI_MODE_LABELS[mode].description}
-                </span>
-              </div>
-
-              {/* Sub-toggle: only visible when Thinking is active */}
-              {(mode === 'thinking_standard' || mode === 'thinking_extended') && (
-                <div className="flex items-center gap-1 mt-1.5 ml-0.5">
-                  <span className="text-[10px] text-slate-400 mr-1">Tingkat:</span>
-                  <button
-                    onClick={() => setMode('thinking_standard')}
-                    disabled={isLoading}
-                    className={cn(
-                      'flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all',
-                      mode === 'thinking_standard'
-                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                        : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
-                    )}
-                  >
-                    <Brain className="h-2.5 w-2.5" />
-                    Standard
-                  </button>
-                  <button
-                    onClick={() => setMode('thinking_extended')}
-                    disabled={isLoading}
-                    className={cn(
-                      'flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all',
-                      mode === 'thinking_extended'
-                        ? 'bg-amber-50 border-amber-200 text-amber-700'
-                        : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
-                    )}
-                  >
-                    <Star className="h-2.5 w-2.5" />
-                    Extended
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex gap-3 items-end">
-              <div className="flex-1 relative">
+          <div className="px-4 pb-5 pt-3 bg-slate-50">
+            {/* Pill container */}
+            <div className={cn(
+              'mx-auto w-full max-w-3xl rounded-3xl bg-white border border-slate-200 shadow-sm transition-shadow duration-200',
+              'focus-within:shadow-md focus-within:border-slate-300'
+            )}>
+              {/* Textarea */}
+              <div className="px-5 pt-4">
                 <TextareaAutosize
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ketik atau paste teks akademik Anda... (Enter untuk kirim, Shift+Enter baris baru)"
-                  className="w-full input-field resize-none min-h-[52px] max-h-[280px] pr-4 leading-relaxed"
+                  placeholder="Ketik atau paste teks akademik Anda..."
+                  className="w-full resize-none bg-transparent text-sm text-slate-800 placeholder-slate-400 outline-none leading-relaxed"
                   minRows={2}
                   maxRows={10}
                   disabled={isLoading}
                 />
               </div>
-              {isLoading ? (
-                <button
-                  onClick={stopGeneration}
-                  className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition"
-                  title="Hentikan"
-                >
-                  <Square className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim()}
-                  className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all bg-primary-500 text-white hover:bg-primary-600 shadow-lg shadow-primary-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <Send className="h-4 w-4" />
-                </button>
-              )}
+
+              {/* Bottom bar: mode pills left, send/stop right */}
+              <div className="flex items-center gap-2 px-4 pb-3 pt-2">
+                {/* Mode pills */}
+                <div className="flex items-center gap-1.5 flex-1 flex-wrap">
+                  <button
+                    onClick={() => setMode('instant')}
+                    disabled={isLoading}
+                    className={cn(
+                      'flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all',
+                      mode === 'instant'
+                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                        : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                    )}
+                  >
+                    <Zap className="h-3 w-3" />
+                    Cepat
+                  </button>
+
+                  <button
+                    onClick={() => { if (mode === 'instant') setMode('thinking_standard'); }}
+                    disabled={isLoading}
+                    className={cn(
+                      'flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all',
+                      (mode === 'thinking_standard' || mode === 'thinking_extended')
+                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                        : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                    )}
+                  >
+                    <Brain className="h-3 w-3" />
+                    Thinking
+                  </button>
+
+                  {/* Sub-toggle Standard / Extended */}
+                  {(mode === 'thinking_standard' || mode === 'thinking_extended') && (
+                    <>
+                      <span className="text-slate-300 text-xs">|</span>
+                      <button
+                        onClick={() => setMode('thinking_standard')}
+                        disabled={isLoading}
+                        className={cn(
+                          'flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all',
+                          mode === 'thinking_standard'
+                            ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                            : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                        )}
+                      >
+                        <Brain className="h-2.5 w-2.5" />
+                        Standard
+                      </button>
+                      <button
+                        onClick={() => setMode('thinking_extended')}
+                        disabled={isLoading}
+                        className={cn(
+                          'flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all',
+                          mode === 'thinking_extended'
+                            ? 'bg-amber-50 border-amber-200 text-amber-700'
+                            : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                        )}
+                      >
+                        <Star className="h-2.5 w-2.5" />
+                        Extended
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Send / Stop */}
+                {isLoading ? (
+                  <button
+                    onClick={stopGeneration}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500 hover:bg-rose-200 transition"
+                    title="Hentikan"
+                  >
+                    <Square className="h-3.5 w-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim()}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500 text-white hover:bg-indigo-600 transition-all shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
