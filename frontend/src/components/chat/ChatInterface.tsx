@@ -106,14 +106,6 @@ function EmptyState() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12 select-none">
-      {/* Logo mark */}
-      <div className="relative mb-8">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-50 to-slate-100 border border-slate-200 shadow-sm flex items-center justify-center">
-          <BookOpen className="h-9 w-9 text-indigo-400" strokeWidth={1.5} />
-        </div>
-        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500 text-[8px] font-bold text-white shadow">AI</span>
-      </div>
-
       {/* Headline */}
       <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-2">
         Selamat datang di <span className="text-indigo-500">Skripsiku</span>
@@ -415,9 +407,6 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
       <div className="flex h-14 items-center gap-4 border-b border-slate-200 bg-white px-4 flex-shrink-0">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <BookOpen className="h-4 w-4 text-primary-500 flex-shrink-0" />
-          <span className="font-semibold text-slate-900 text-sm truncate">
-            {currentTitle ?? headerTitle ?? 'Skripsiku'}
-          </span>
         </div>
 
 
