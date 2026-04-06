@@ -40,12 +40,6 @@ const QUICK_ACTIONS: { taskType: TaskType; label: string; icon: string; mode: Ai
   { taskType: 'originality_analysis', label: 'Cek Orisinalitas', icon: '🛡️', mode: 'thinking_standard' },
 ];
 
-const MODE_ICONS: Record<AiMode, React.ComponentType<{ className?: string }>> = {
-  instant: Zap,
-  thinking_standard: Brain,
-  thinking_extended: Star,
-};
-
 // ── Thinking Panel ──────────────────────────────────────────────────────────
 function ThinkingPanel({ content, isStreaming }: { content: string; isStreaming?: boolean }) {
   const [open, setOpen] = useState(isStreaming ?? false);
@@ -356,25 +350,67 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
           <div className="border-t border-slate-200 p-4">
 
             {/* Mode selector — right above the textarea */}
-            <div className="flex items-center gap-1.5 mb-2.5">
-              {(Object.entries(AI_MODE_LABELS) as [AiMode, (typeof AI_MODE_LABELS)[AiMode]][]).map(([m, info]) => {
-                const Icon = MODE_ICONS[m];
-                return (
+            <div className="mb-2.5">
+              <div className="flex items-center gap-1.5">
+                {/* Fast button */}
+                <button
+                  onClick={() => setMode('instant')}
+                  disabled={isLoading}
+                  className={cn('mode-pill', mode === 'instant' && 'active')}
+                  title={AI_MODE_LABELS.instant.description}
+                >
+                  <Zap className="h-3 w-3" />
+                  <span>Cepat</span>
+                </button>
+
+                {/* Thinking group button */}
+                <button
+                  onClick={() => { if (mode === 'instant') setMode('thinking_standard'); }}
+                  disabled={isLoading}
+                  className={cn('mode-pill', (mode === 'thinking_standard' || mode === 'thinking_extended') && 'active')}
+                  title="Mode berpikir mendalam"
+                >
+                  <Brain className="h-3 w-3" />
+                  <span>Thinking</span>
+                </button>
+
+                <span className="ml-auto text-[11px] text-slate-400 hidden sm:block">
+                  {AI_MODE_LABELS[mode].description}
+                </span>
+              </div>
+
+              {/* Sub-toggle: only visible when Thinking is active */}
+              {(mode === 'thinking_standard' || mode === 'thinking_extended') && (
+                <div className="flex items-center gap-1 mt-1.5 ml-0.5">
+                  <span className="text-[10px] text-slate-400 mr-1">Tingkat:</span>
                   <button
-                    key={m}
-                    onClick={() => setMode(m)}
+                    onClick={() => setMode('thinking_standard')}
                     disabled={isLoading}
-                    className={cn('mode-pill', mode === m && 'active')}
-                    title={info.description}
+                    className={cn(
+                      'flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all',
+                      mode === 'thinking_standard'
+                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                        : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                    )}
                   >
-                    <Icon className="h-3 w-3" />
-                    <span>{info.labelId}</span>
+                    <Brain className="h-2.5 w-2.5" />
+                    Standard
                   </button>
-                );
-              })}
-              <span className="ml-auto text-[11px] text-slate-600 hidden sm:block">
-                {AI_MODE_LABELS[mode].description}
-              </span>
+                  <button
+                    onClick={() => setMode('thinking_extended')}
+                    disabled={isLoading}
+                    className={cn(
+                      'flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all',
+                      mode === 'thinking_extended'
+                        ? 'bg-amber-50 border-amber-200 text-amber-700'
+                        : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                    )}
+                  >
+                    <Star className="h-2.5 w-2.5" />
+                    Extended
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 items-end">
@@ -466,27 +502,67 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
                   <div className="border-t border-slate-200 pt-4">
                     <p className="text-xs font-medium text-slate-500 mb-3">Mode AI</p>
                     <div className="space-y-2">
-                      {(Object.entries(AI_MODE_LABELS) as [AiMode, (typeof AI_MODE_LABELS)[AiMode]][]).map(([m, info]) => {
-                        const Icon = MODE_ICONS[m];
-                        return (
+                      {/* Fast */}
+                      <button
+                        onClick={() => setMode('instant')}
+                        className={cn(
+                          'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all duration-200',
+                          mode === 'instant' ? 'border-indigo-200 bg-indigo-50' : 'border-transparent hover:bg-slate-100'
+                        )}
+                      >
+                        <Zap className={cn('h-4 w-4 mt-0.5 flex-shrink-0', AI_MODE_LABELS.instant.color)} />
+                        <div>
+                          <p className="text-xs font-semibold text-slate-800">Cepat</p>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-snug">{AI_MODE_LABELS.instant.description}</p>
+                        </div>
+                      </button>
+
+                      {/* Thinking group */}
+                      <button
+                        onClick={() => { if (mode === 'instant') setMode('thinking_standard'); }}
+                        className={cn(
+                          'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all duration-200',
+                          (mode === 'thinking_standard' || mode === 'thinking_extended') ? 'border-indigo-200 bg-indigo-50' : 'border-transparent hover:bg-slate-100'
+                        )}
+                      >
+                        <Brain className={cn('h-4 w-4 mt-0.5 flex-shrink-0', AI_MODE_LABELS.thinking_standard.color)} />
+                        <div>
+                          <p className="text-xs font-semibold text-slate-800">Thinking</p>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-snug">Reasoning mendalam untuk tugas kompleks</p>
+                        </div>
+                      </button>
+
+                      {/* Sub-options when Thinking is active */}
+                      {(mode === 'thinking_standard' || mode === 'thinking_extended') && (
+                        <div className="ml-3 pl-3 border-l-2 border-indigo-100 space-y-1.5">
                           <button
-                            key={m}
-                            onClick={() => setMode(m)}
+                            onClick={() => setMode('thinking_standard')}
                             className={cn(
-                              'w-full flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all duration-200',
-                              mode === m
-                                ? 'border-indigo-200 bg-indigo-50'
-                                : 'border-transparent hover:bg-slate-100'
+                              'w-full flex items-start gap-2 p-2 rounded-lg border text-left transition-all',
+                              mode === 'thinking_standard' ? 'border-indigo-200 bg-white' : 'border-transparent hover:bg-slate-50'
                             )}
                           >
-                            <Icon className={cn('h-4 w-4 mt-0.5 flex-shrink-0', info.color)} />
+                            <Brain className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-indigo-500" />
                             <div>
-                              <p className="text-xs font-semibold text-slate-800">{info.labelId}</p>
-                              <p className="text-xs text-slate-400 mt-0.5 leading-snug">{info.description}</p>
+                              <p className="text-xs font-semibold text-slate-700">Standard</p>
+                              <p className="text-[10px] text-slate-400 leading-snug">{AI_MODE_LABELS.thinking_standard.description}</p>
                             </div>
                           </button>
-                        );
-                      })}
+                          <button
+                            onClick={() => setMode('thinking_extended')}
+                            className={cn(
+                              'w-full flex items-start gap-2 p-2 rounded-lg border text-left transition-all',
+                              mode === 'thinking_extended' ? 'border-amber-200 bg-amber-50' : 'border-transparent hover:bg-slate-50'
+                            )}
+                          >
+                            <Star className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-amber-500" />
+                            <div>
+                              <p className="text-xs font-semibold text-slate-700">Extended</p>
+                              <p className="text-[10px] text-slate-400 leading-snug">{AI_MODE_LABELS.thinking_extended.description}</p>
+                            </div>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
