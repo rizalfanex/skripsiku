@@ -334,13 +334,11 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
   const handleConversationId = useCallback((id: string) => {
     onConversationCreated?.(id);
-    // Silently update the URL without triggering Next.js navigation so the
-    // component does not re-mount, messages state is preserved (displayContent
-    // / fileAttachment intact) and the scroll position does not jump.
-    if (!conversationId) {
-      window.history.replaceState(null, '', `/chat/${id}`);
-    }
-  }, [conversationId, onConversationCreated]);
+    // Do NOT update the URL here. Next.js App Router patches history.replaceState
+    // and router.replace — both trigger navigation, causing component remount,
+    // messages state reset, and API reload (which strips displayContent/fileAttachment).
+    // The conversation is already visible in the sidebar via upsertSidebarConversation.
+  }, [onConversationCreated]);
 
   const handleTitleUpdate = useCallback((title: string) => {
     setCurrentTitle(title);
