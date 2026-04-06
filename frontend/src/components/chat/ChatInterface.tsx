@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Square, Settings2, BookOpen,
@@ -310,7 +309,6 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ conversationId, onConversationCreated, headerTitle }: ChatInterfaceProps) {
-  const router = useRouter();
   const {
     mode, language, citationStyle, documentType,
     setMode, setLanguage, setCitationStyle,
@@ -336,11 +334,13 @@ export function ChatInterface({ conversationId, onConversationCreated, headerTit
 
   const handleConversationId = useCallback((id: string) => {
     onConversationCreated?.(id);
-    // Stream is already complete when this fires, so navigation is safe.
+    // Silently update the URL without triggering Next.js navigation so the
+    // component does not re-mount, messages state is preserved (displayContent
+    // / fileAttachment intact) and the scroll position does not jump.
     if (!conversationId) {
-      router.replace(`/chat/${id}`);
+      window.history.replaceState(null, '', `/chat/${id}`);
     }
-  }, [conversationId, onConversationCreated, router]);
+  }, [conversationId, onConversationCreated]);
 
   const handleTitleUpdate = useCallback((title: string) => {
     setCurrentTitle(title);
