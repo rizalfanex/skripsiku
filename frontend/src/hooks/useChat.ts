@@ -94,10 +94,11 @@ export function useChat({ conversationId, onConversationId, onTitleUpdate, onErr
             if (!currentConvIdRef.current) {
               currentConvIdRef.current = event.conversation_id;
               pendingConvIdRef.current = event.conversation_id;
-              setStreamingConversationId(event.conversation_id);
+              const clean = content.trim();
+              const title = clean.length > 60 ? clean.slice(0, 57).trimEnd() + '...' : clean || 'Chat Baru';
               upsertSidebarConversation({
                 id: event.conversation_id,
-                title: null,
+                title,
                 project_id: activeProject?.id ?? null,
                 mode,
                 task_type: taskType,
